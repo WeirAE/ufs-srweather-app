@@ -6,10 +6,8 @@ import datetime as dt
 import os
 import sys
 from argparse import ArgumentParser
-from copy import deepcopy
 from pathlib import Path
 
-from uwtools.api.file import link as uwlink
 from uwtools.api.chgres_cube import Chgres_Cube
 from uwtools.api.config import get_yaml_config
 
@@ -54,8 +52,32 @@ chgres_cube_driver = Chgres_Cube(
 )
 rundir = Path(chgres_cube_driver.config["rundir"])
 print(f"Will run in {rundir}")
-# Run chgres_cube
-chgres_cube_driver.run()
+
+
+varsfilepath = chgres_cube_driver.config["task_make_ics"]["input_files_metadata_path"]
+extrn_config_fns = get_sh_config(varsfilepath)[EXTRN_MDL_FNS]
+
+# make_ics
+fn_atm = extrn_config_fns[0]
+fn_sfc = extrn_config_fns[1]
+
+# Loop the run of chgres_cube for the forecast length
+num_fhrs = chgres_cube_driver.config["workflow"]["FCST_LEN_HRS"]
+bcgrp10 = 0
+bcgrpnum10 = 1
+for ii in range(bcgrp10, num_fhrs, bcgrpnum10):
+    i = ii + bcgrpnum10
+    if i < num_fhrs:
+        print(f"group ${bcgrp10} processes member ${i}")
+        fn_atm = f"${{EXTRN_MDL_FNS[${i}]}}"
+        fn_sfc= "$EXTRN_MDL_FNS[1]"
+    
+        if ics_or_lbcs == "LBCS":
+            chgres_cube_driver.config["task_make_lbcs"]["chgres_cube"]["namelist"]["update_values"]["config"]["atm_files_input_grid"] = fn_atm
+        else ics_or_lbcs == "ICS":
+            chgres_cube_driver.config["task_make_ics"]["chgres_cube"]["namelist"]["update_values"]["config"]["atm_files_input_grid"] = fn_atm
+            chgres_cube_driver.config["task_make_ics"]["chgres_cube"]["namelist"]["update_values"]["config"]["sfc_files_input_grid"] = fn_sfc
+        chgres_cube_driver.run()
 
 if not (rundir / "runscript.chgres_cube.done").is_file():
     print("Error occurred running chgres_cube. Please see component error logs.")
@@ -64,22 +86,3 @@ if not (rundir / "runscript.chgres_cube.done").is_file():
 # Deliver output data
 expt_config = get_yaml_config(args.config_file)
 chgres_cube_config = expt_config[args.key_path]
-
-links = {}
-for label in chgres_cube_config["output_file_labels"]:
-    # deepcopy here because desired_output_name is parameterized within the loop
-    expt_config_cp = get_yaml_config(deepcopy(expt_config.data))
-    expt_config_cp.dereference(
-        context={
-            "cycle": args.cycle,
-            "leadtime": args.leadtime,
-            "file_label": label,
-            **expt_config_cp,
-        }
-    )
-    chgres_cube_block = expt_config_cp[args.key_path]
-    desired_output_fn = chgres_cube_block["desired_output_name"]
-    upp_output_fn = rundir / f"{label.upper()}.GrbF{int(args.leadtime.total_seconds() // 3600):02d}"
-    links[desired_output_fn] = str(upp_output_fn)
-
-uwlink(target_dir=rundir.parent, config=links)
