@@ -1660,9 +1660,9 @@ task_make_ics:
       update_values:
         config:
           fix_dir_target_grid: "{{ workflow.FIXlam }}"
-          mosaic_file_target_grid: "{{ workflow.FIXlam }}/{{ workflow.CRES }}{{ workflow.DOT_OR_USCORE }}mosaic.halo{{ constants.NH4 }}.nc"
+          mosaic_file_target_grid: "{{ workflow.FIXlam }}/{{ "CRES" | env }} {{ workflow.DOT_OR_USCORE }}mosaic.halo{{ constants.NH4 }}.nc"
           orog_dir_target_grid: "{{ workflow.FIXlam }}"
-          orog_files_target_grid: "{{ workflow.CRES }}{{ workflow.DOT_OR_USCORE }}oro_data.tile{{ constants. TILE_RGNL }}.halo{{ constants.NH4 }}.nc"
+          orog_files_target_grid: "{{ "CRES" | env }} {{ workflow.DOT_OR_USCORE }}oro_data.tile{{ constants. TILE_RGNL }}.halo{{ constants.NH4 }}.nc"
           vcoord_file_target_grid: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
           data_dir_input_grid: "{{ task_make_lbcs.chgres_cube.run_dir }}"

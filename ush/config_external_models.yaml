@@ -1,0 +1,11 @@
+task_make_ics:
+  chgres_cube:
+    namelist:
+      update_values:
+        config:
+          atm_files_input_grid: ""
+          grib2_file_input_grid: ""
+          input_type: "gaussian_nemsio" 
+          external_model: "FV3GFS"
+          tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]"
+          tracers: "[\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]"
