@@ -2,10 +2,44 @@ task_make_ics:
   chgres_cube:
     namelist:
       update_values:
-        config:
+        config: >
+          fn_atm: ""
+          fn_sfc: ""
+          vgtyp_from_climo: True
+          sotyp_from_climo: True
+          vgfrc_from_climo: True
+          minmax_vgfrc_from_climo: True
+          lai_from_climo: True
+          tg3_from_soil: '"true" if {{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }} == "GDAS" else "false"'
+          convert_nst: '"true" if {{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }} == "FV3GFS" && {{ task_get_extrn_ics.FV3GFS_FILE_FMT_ICS }} != "grib2" else "false"
+          external_model: {{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }}
+          input_type: '"grib2" if {{ task_get_extrn_ics.FV3GFS_FILE_FMT_ICS }} == "grib2" else "gaussian_{{ task_get_extrn_ics.FV3GFS_FILE_FMT_ICS }}"'
+          {% if {{ task_get_extrn_lbcs.EXTRN_MDL_NAME_LBCS }} in [FV3GFS, UFS-CASE-STUDY, GDAS] 
+          and {{ task_get_extrn_lbcs.FV3GFS_FILE_FMT_LBCS }} != "grib2" %}
+            tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]"
+            tracers: "[\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]"
+          elif {{ task_get_extrn_lbcs.EXTRN_MDL_NAME_LBCS }} == "GSMGFS"
+            input_type: "gfs_gaussian_nemsio" 
+            tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\"]"
+            tracers: "[\"sphum\",\"liq_wat\",\"o3mr\"]"
+          {% endif %}
+          geogrid_file_input_grid: '"{{ platform.FIXgsm }}/geo_em.d01.nc_{{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }}X" if {{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }} in ["RAP", "HRRR"] else ""'
+        
+task_make_lbcs:
+  chgres_cube:
+    namelist:
+      update_values:
+        config: >
           atm_files_input_grid: ""
           grib2_file_input_grid: ""
-          input_type: "gaussian_nemsio" 
-          external_model: "FV3GFS"
-          tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]"
-          tracers: "[\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]"
+          external_model: {{ task_get_extrn_lbcs.EXTRN_MDL_NAME_LBCS }}
+          input_type: '"grib2" if {{ task_get_extrn_lbcs.FV3GFS_FILE_FMT_LBCS }} = "grib2" else "gaussian_{{ task_get_extrn_lbcs.FV3GFS_FILE_FMT_LBCS }}"'
+          {% if {{ task_get_extrn_lbcs.EXTRN_MDL_NAME_LBCS }} in [FV3GFS, UFS-CASE-STUDY, GDAS] 
+          and {{ task_get_extrn_lbcs.FV3GFS_FILE_FMT_LBCS }} != "grib2" %}
+            tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]"
+            tracers: "[\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]"
+          elif {{ task_get_extrn_lbcs.EXTRN_MDL_NAME_LBCS }} == "GSMGFS"
+            input_type: "gfs_gaussian_nemsio" 
+            tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\"]"
+            tracers: "[\"sphum\",\"liq_wat\",\"o3mr\"]"
+          {% endif %}
