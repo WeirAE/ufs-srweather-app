@@ -46,18 +46,6 @@ args = parser.parse_args()
 
 os.environ["member"] = args.member
 
-# Print message indicating entry into script.
-print("""
-========================================================================
-Entering script:  \"${scrfunc_fn}\"
-In directory:     \"${scrfunc_dir}\"
-
-This is the ex-script for the task that generates lateral boundary con-
-dition (LBC) files (in NetCDF format) for all LBC update hours (except
-hour zero).
-========================================================================
-      """)
-
 
 # fix CRES dereferencing
 expt_config = get_yaml_config(args.config_file) 
@@ -78,6 +66,7 @@ chgres_cube_driver = Chgres_Cube(
 )
 rundir = Path(chgres_cube_driver.config["rundir"])
 print(f"Will run in {rundir}")
+
 
 if args.key_path == "task_make_ics"
 varsfilepath = chgres_cube_driver.config["task_make_ics"]["input_files_metadata_path"]
@@ -113,17 +102,7 @@ else:
 
 # error message
 if not (rundir / "runscript.chgres_cube.done").is_file():
-    print("""
-Call to executable (exec_fp) to generate lateral boundary conditions (LBCs)
-file for the FV3-LAM for forecast hour fhr failed:
-  exec_fp = \"${exec_fp}\"
-  fhr = \"$fhr\"
-The external model from which the LBCs files are to be generated is:
-  EXTRN_MDL_NAME_LBCS = \"${EXTRN_MDL_NAME_LBCS}\"
-The external model files that are inputs to the executable (exec_fp) are
-located in the following directory:
-  extrn_mdl_staging_dir = \"${extrn_mdl_staging_dir}\"
-          """)
+    print("Error occurred running chgres_cube. Please see component error logs.")
     sys.exit(1)
 
 # Deliver output data
@@ -150,7 +129,7 @@ for label in chgres_cube_config["output_file_labels"]:
     lbc_spec_fhrs = extrn_config_fhrs[i]
     lbc_offset_fhrs = chgres_cube_driver.config["task_get_extrn_lbcs"]["EXTRN_MDL_LBCS_OFFSET_HRS"]
     nco_net = chgres_cube_driver.config["nco"]["NET_default"]
-    dot_ensmem = f".mem{ENSMEM_INDX}"
+    dot_ensmem = f".mem{ args.member }"
     fcst_hhh = ( lbc_spec_fhrs - lbc_offset_fhrs )
     fcst_hhh_FV3LAM = print(f"fcst_hhh:03d")
 
@@ -159,18 +138,3 @@ for label in chgres_cube_config["output_file_labels"]:
     links[lbc_input_fn] = str(lbc_output_fn)
 
 uwlink(target_dir=rundir.parent, config=links)
-
-# Process FVCOM Data
-
-
-
-# Print message indicating successful completion of script.
-print("""
-========================================================================
-Lateral boundary condition (LBC) files (in NetCDF format) generated suc-
-cessfully for all LBC update hours (except hour zero)!!!
-
-Exiting script:  \"${scrfunc_fn}\"
-In directory:    \"${scrfunc_dir}\"
-========================================================================
-      """)
