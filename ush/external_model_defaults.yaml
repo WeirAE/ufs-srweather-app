@@ -8,7 +8,7 @@ grib2_defaults: &grib2_defaults
           tracers_input: ""
           tracers: ""
 
-GSMGFS
+GSMGFS:
   task_make_ics:
     chgres_cube:
       input_type: "gfs_gaussian_nemsio"
@@ -24,7 +24,7 @@ GSMGFS
       tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\"]"
       tracers: "[\"sphum\",\"liq_wat\",\"o3mr\"]"
 
-UFS-CASE-STUDY
+UFS-CASE-STUDY:
   task_make_ics:
     chgres_cube:
       external_model: "UFS-CASE-STUDY"
@@ -32,7 +32,7 @@ UFS-CASE-STUDY
     chgres_cube:
       external_model: "UFS-CASE-STUDY"
 
-GDAS
+GDAS:
   task_make_ics:
     chgres_cube:
       external_model: "GFS"
@@ -42,7 +42,7 @@ GDAS
       external_model: "GFS"
       tg3_from_soil: True
 
-GEFS
+GEFS:
   task_make_ics:
     chgres_cube:
       external_model: "GFS"
@@ -52,7 +52,7 @@ GEFS
       external_model: "GFS"
       <<: *grib2_defaults
 
-HRRR
+HRRR:
   task_make_ics:
     chgres_cube:
       external_model: "HRRR"
@@ -66,7 +66,7 @@ HRRR
       tg3_from_soil: True
       <<: *grib2_defaults
 
-RAP
+RAP:
   task_make_ics:
     chgres_cube:
       external_model: "RAP"
@@ -80,7 +80,7 @@ RAP
       tg3_from_soil: True
       <<: *grib2_defaults
 
-NAM
+NAM:
   task_make_ics:
     chgres_cube:
       external_model: "NAM"

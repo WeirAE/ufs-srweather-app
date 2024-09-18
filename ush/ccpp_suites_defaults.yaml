@@ -5,7 +5,7 @@ gsd_defaults: &gsd_defaults
         config:
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
 
-FV3_RAP
+FV3_RAP:
   task_make_ics:
     chgres_cube:
       <<: *gsd_defaults
@@ -13,7 +13,7 @@ FV3_RAP
     chgres_cube:
       <<: *gsd_defaults
 
-FV3_HRRR
+FV3_HRRR:
   task_make_ics:
     chgres_cube:
       <<: *gsd_defaults
@@ -21,7 +21,7 @@ FV3_HRRR
     chgres_cube:
       <<: *gsd_defaults
 
-FV3_WoFS_v0
+FV3_WoFS_v0:
   task_make_ics:
     chgres_cube:
       <<: *gsd_defaults
@@ -29,7 +29,7 @@ FV3_WoFS_v0
     chgres_cube:
       <<: *gsd_defaults
 
-FV3_RRFS_v1beta
+FV3_RRFS_v1beta:
   task_make_ics:
     chgres_cube:
       <<: *gsd_defaults
@@ -37,7 +37,7 @@ FV3_RRFS_v1beta
     chgres_cube:
       <<: *gsd_defaults
 
-FV3_GFS_v15_thompson_mynn_lam3km
+FV3_GFS_v15_thompson_mynn_lam3km:
   task_make_ics:
     chgres_cube:
       <<: *gsd_defaults
@@ -45,7 +45,7 @@ FV3_GFS_v15_thompson_mynn_lam3km
     chgres_cube:
       <<: *gsd_defaults
 
-FV3_GFS_v17_p8
+FV3_GFS_v17_p8:
   task_make_ics:
     chgres_cube:
       <<: *gsd_defaults

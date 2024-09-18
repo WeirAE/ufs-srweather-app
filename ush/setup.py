@@ -235,7 +235,7 @@ def load_config_for_setup(ushdir, default_config, user_config):
     update_dict(ccpp_cfg, cfg_d)
 
     # Load external model-specific settings
-    extrn_mdl = cfg_d["workflow"]["EXTRN_MDL"]
+    extrn_mdl = cfg_d["task_get_extrn_ics"]["EXTRN_MDL_NAME_ICS"]
     extrn_cfg = get_yaml_config(Path(ushdir, "external_model_defaults.yaml")).get(
         extrn_mdl, {}
     )
