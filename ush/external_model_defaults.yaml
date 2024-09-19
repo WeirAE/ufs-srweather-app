@@ -1,12 +1,11 @@
-grib2_defaults: &grib2_defaults
-  chgres_cube:
-    namelist:
-      update_values:
-        config:
-          input_type: "grib2"
-          convert_nst: False
-          tracers_input: ""
-          tracers: ""
+chgres_cube_grib2_defaults: &chgres_cube_grib2_defaults
+  namelist:
+    update_values:
+      config:
+        input_type: "grib2"
+        convert_nst: False
+        tracers_input: ""
+        tracers: ""
 
 GSMGFS:
   task_make_ics:
@@ -63,14 +62,14 @@ GDAS:
 GEFS:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults
       namelist:
           update_values:
             config:
               external_model: "GFS"
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults
       namelist:
           update_values:
             config:
@@ -79,7 +78,7 @@ GEFS:
 HRRR:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults
       namelist:
           update_values:
             config:
@@ -88,7 +87,7 @@ HRRR:
               tg3_from_soil: True
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults:
       namelist:
           update_values:
             config:
@@ -99,7 +98,7 @@ HRRR:
 RAP:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults
       namelist:
           update_values:
             config:
@@ -108,7 +107,7 @@ RAP:
               tg3_from_soil: True
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults
       namelist:
           update_values:
             config:
@@ -119,14 +118,14 @@ RAP:
 NAM:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults
       namelist:
           update_values:
             config:
               external_model: "NAM"
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
+      <<: *chgres_cube_grib2_defaults
       namelist:
           update_values:
             config:

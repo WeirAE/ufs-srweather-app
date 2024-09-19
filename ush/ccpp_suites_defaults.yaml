@@ -1,9 +1,8 @@
-gsd_defaults: &gsd_defaults
-  chgres_cube:
-    namelist:
-      update_values:
-        config:
-          varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
+chgres_cube_gsd_defaults: &chgres_cube_gsd_defaults
+  namelist:
+    update_values:
+      config:
+        varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
 
 orog_gsl_defaults: &orog_gsl_defaults
   config:
@@ -27,54 +26,54 @@ orog_gsl_defaults: &orog_gsl_defaults
 FV3_RAP:
   task_make_ics:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_lbcs:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_orog:
     orog_gsl:
       <<: *orog_gsl_defaults
 FV3_HRRR:
   task_make_ics:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_lbcs:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_orog:
     orog_gsl:
       <<: *orog_gsl_defaults
 FV3_WoFS_v0:
   task_make_ics:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_lbcs:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
 FV3_RRFS_v1beta:
   task_make_ics:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_lbcs:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
 FV3_GFS_v15_thompson_mynn_lam3km:
   task_make_ics:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_lbcs:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_orog:
     orog_gsl:
       <<: *orog_gsl_defaults
 FV3_GFS_v17_p8:
   task_make_ics:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_lbcs:
     chgres_cube:
-      <<: *gsd_defaults
+      <<: *chgres_cube_gsd_defaults
   task_make_orog:
     orog_gsl:
       <<: *orog_gsl_defaults
