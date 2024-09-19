@@ -8,13 +8,13 @@ import argparse
 import os
 import sys
 from textwrap import dedent
+from uwtools.api.config import get_yaml_config
 from uwtools.api.template import render
 
 from python_utils import (
     cfg_to_yaml_str,
     flatten_dict,
     import_vars,
-    load_yaml_config,
     print_info_msg,
     print_input_args,
 )
@@ -34,7 +34,7 @@ def create_diag_table_file(run_dir):
     # import all environment variables
     import_vars()
 
-    #pylint: disable=undefined-variable
+    # pylint: disable=undefined-variable
     # create a diagnostic table file within the specified run directory
     print_info_msg(
         f"""
@@ -74,10 +74,10 @@ def create_diag_table_file(run_dir):
     )
 
     render(
-        input_file = DIAG_TABLE_TMPL_FP,
-        output_file = diag_table_fp,
-        values_src = settings,
-        )
+        input_file=DIAG_TABLE_TMPL_FP,
+        output_file=diag_table_fp,
+        values_src=settings,
+    )
     return True
 
 
@@ -102,7 +102,7 @@ def parse_args(argv):
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
-    cfg = load_yaml_config(args.path_to_defns)
+    cfg = get_yaml_config(args.path_to_defns)
     cfg = flatten_dict(cfg)
     import_vars(dictionary=cfg)
     create_diag_table_file(args.run_dir)

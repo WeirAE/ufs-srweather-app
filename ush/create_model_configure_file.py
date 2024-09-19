@@ -7,13 +7,13 @@ import argparse
 import os
 import sys
 from textwrap import dedent
+from uwtools.api.config import get_yaml_config
 from uwtools.api.template import render
 
 from python_utils import (
     cfg_to_yaml_str,
     flatten_dict,
     import_vars,
-    load_yaml_config,
     lowercase,
     print_info_msg,
     print_input_args,
@@ -22,9 +22,14 @@ from python_utils import (
 
 
 def create_model_configure_file(
-    cdate, fcst_len_hrs, fhrot, run_dir, dt_atmos, sub_hourly_post=False,
+    cdate,
+    fcst_len_hrs,
+    fhrot,
+    run_dir,
+    dt_atmos,
+    sub_hourly_post=False,
     dt_subhourly_post_mnts=None,
-    ): #pylint: disable=too-many-arguments
+):  # pylint: disable=too-many-arguments
     """Creates a model configuration file in the specified
     run directory
 
@@ -118,9 +123,7 @@ def create_model_configure_file(
                     "dlat": "",
                 }
             )
-        elif (
-            WRTCMP_output_grid in ("regional_latlon", "rotated_latlon")
-        ):
+        elif WRTCMP_output_grid in ("regional_latlon", "rotated_latlon"):
             settings.update(
                 {
                     "lon2": WRTCMP_lon_upr_rght,
@@ -221,10 +224,10 @@ def create_model_configure_file(
     model_config_fp = os.path.join(run_dir, MODEL_CONFIG_FN)
 
     render(
-        input_file = MODEL_CONFIG_TMPL_FP,
-        output_file = model_config_fp,
-        values_src = settings
-        )
+        input_file=MODEL_CONFIG_TMPL_FP,
+        output_file=model_config_fp,
+        values_src=settings,
+    )
     return True
 
 
@@ -295,7 +298,7 @@ def parse_args(argv):
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
-    cfg = load_yaml_config(args.path_to_defns)
+    cfg = get_yaml_config(args.path_to_defns)
     cfg = flatten_dict(cfg)
     import_vars(dictionary=cfg)
     create_model_configure_file(

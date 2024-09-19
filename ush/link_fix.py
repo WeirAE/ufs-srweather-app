@@ -6,6 +6,7 @@ import argparse
 import re
 import glob
 
+from uwtools.api.config import get_yaml_config
 from python_utils import (
     import_vars,
     print_input_args,
@@ -18,7 +19,6 @@ from python_utils import (
     cd_vrfy,
     mkdir_vrfy,
     find_pattern_in_str,
-    load_yaml_config,
 )
 
 
@@ -207,7 +207,12 @@ def link_fix(
             f"C*{dot_or_uscore}oro_data.tile{tile_rgnl}.halo{nh0}.nc",
             f"C*{dot_or_uscore}oro_data.tile{tile_rgnl}.halo{nh4}.nc",
         ]
-        if ccpp_phys_suite == "FV3_RAP" or ccpp_phys_suite == "FV3_HRRR" or ccpp_phys_suite == "FV3_GFS_v15_thompson_mynn_lam3km" or ccpp_phys_suite == "FV3_GFS_v17_p8":
+        if (
+            ccpp_phys_suite == "FV3_RAP"
+            or ccpp_phys_suite == "FV3_HRRR"
+            or ccpp_phys_suite == "FV3_GFS_v15_thompson_mynn_lam3km"
+            or ccpp_phys_suite == "FV3_GFS_v17_p8"
+        ):
             fns += [
                 f"C*{dot_or_uscore}oro_data_ss.tile{tile_rgnl}.halo{nh0}.nc",
                 f"C*{dot_or_uscore}oro_data_ls.tile{tile_rgnl}.halo{nh0}.nc",
@@ -403,7 +408,7 @@ def parse_args(argv):
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
-    cfg = load_yaml_config(args.path_to_defns)
+    cfg = get_yaml_config(args.path_to_defns)
     link_fix(
         verbose=cfg["workflow"]["VERBOSE"],
         file_group=args.file_group,

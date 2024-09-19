@@ -31,10 +31,11 @@ NEEDED_VARS = [
     "FV3_NML_FP",
     "PARMdir",
     "RUN_ENVIR",
-    ]
+]
 
 
 # pylint: disable=undefined-variable
+
 
 def set_fv3nml_sfc_climo_filenames(config, debug=False):
     """
@@ -54,7 +55,9 @@ def set_fv3nml_sfc_climo_filenames(config, debug=False):
 
     import_vars(dictionary=config, env_vars=NEEDED_VARS)
 
-    fixed_cfg = get_yaml_config(os.path.join(PARMdir, "fixed_files_mapping.yaml"))["fixed_files"]
+    fixed_cfg = get_yaml_config(os.path.join(PARMdir, "fixed_files_mapping.yaml"))[
+        "fixed_files"
+    ]
 
     # The regular expression regex_search set below will be used to extract
     # from the elements of the array FV3_NML_VARNAME_TO_SFC_CLIMO_FIELD_MAPPING
@@ -80,7 +83,9 @@ def set_fv3nml_sfc_climo_filenames(config, debug=False):
 
         file_path = os.path.join(FIXlam, f"{CRES}.{sfc_climo_field_name}.{suffix}")
         if RUN_ENVIR != "nco":
-            file_path = os.path.relpath(os.path.realpath(file_path), start=dummy_run_dir)
+            file_path = os.path.relpath(
+                os.path.realpath(file_path), start=dummy_run_dir
+            )
 
         namsfc_dict[nml_var_name] = file_path
 
@@ -106,7 +111,8 @@ def set_fv3nml_sfc_climo_filenames(config, debug=False):
         output_file=FV3_NML_FP,
         output_format="nml",
         update_config=get_nml_config(settings),
-        )
+    )
+
 
 def parse_args(argv):
     """Parse command line arguments"""
@@ -119,14 +125,18 @@ def parse_args(argv):
         required=True,
         help="Path to var_defns file.",
     )
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help='Script will be run in debug mode with more verbose output')
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Script will be run in debug mode with more verbose output",
+    )
 
     return parser.parse_args(argv)
 
 
 if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
-    cfg = load_yaml_config(args.path_to_defns)
+    cfg = get_yaml_config(args.path_to_defns)
     cfg = flatten_dict(cfg)
     set_fv3nml_sfc_climo_filenames(cfg, args.debug)

@@ -16,17 +16,16 @@ from multiprocessing import Pool
 
 sys.path.append("../../ush")
 
+from uwtools.api.config import get_yaml_config
+
 from calculate_cost import calculate_cost
-from python_utils import (
-    cfg_to_yaml_str,
-    flatten_dict,
-    load_config_file,
-    load_yaml_config
-)
+from python_utils import cfg_to_yaml_str, flatten_dict, load_config_file
 
 REPORT_WIDTH = 100
 EXPT_COLUMN_WIDTH = 65
 TASK_COLUMN_WIDTH = 40
+
+
 def print_WE2E_summary(expts_dict: dict, debug: bool = False):
     """Function that creates a summary for the specified experiment
 
@@ -41,38 +40,48 @@ def print_WE2E_summary(expts_dict: dict, debug: bool = False):
 
     # Create summary table as list of strings
     summary = []
-    summary.append('-'*REPORT_WIDTH)
-    summary.append(f'Experiment name {" "*(EXPT_COLUMN_WIDTH-17)} | Status    | Core hours used ')
-    summary.append('-'*REPORT_WIDTH)
+    summary.append("-" * REPORT_WIDTH)
+    summary.append(
+        f'Experiment name {" "*(EXPT_COLUMN_WIDTH-17)} | Status    | Core hours used '
+    )
+    summary.append("-" * REPORT_WIDTH)
     total_core_hours = 0
     statuses = []
     expt_details = []
     for expt in expts_dict:
         statuses.append(expts_dict[expt]["status"])
         ch = 0
-        expt_details.append('')
-        expt_details.append('-'*REPORT_WIDTH)
-        expt_details.append(f'Detailed summary of experiment {expt}')
+        expt_details.append("")
+        expt_details.append("-" * REPORT_WIDTH)
+        expt_details.append(f"Detailed summary of experiment {expt}")
         expt_details.append(f"in directory {expts_dict[expt]['expt_dir']}")
-        expt_details.append(f'{" "*TASK_COLUMN_WIDTH}| Status    | Walltime   | Core hours used')
-        expt_details.append('-'*REPORT_WIDTH)
+        expt_details.append(
+            f'{" "*TASK_COLUMN_WIDTH}| Status    | Walltime   | Core hours used'
+        )
+        expt_details.append("-" * REPORT_WIDTH)
 
         for task in expts_dict[expt]:
             # Skip non-task entries
-            if task in ["expt_dir","status","start_time","walltime"]:
+            if task in ["expt_dir", "status", "start_time", "walltime"]:
                 continue
             status = expts_dict[expt][task]["status"]
             walltime = expts_dict[expt][task]["walltime"]
-            expt_details.append(f'{task[:TASK_COLUMN_WIDTH]:<{TASK_COLUMN_WIDTH}s}  {status:<12s} {walltime:>10.1f}')
+            expt_details.append(
+                f"{task[:TASK_COLUMN_WIDTH]:<{TASK_COLUMN_WIDTH}s}  {status:<12s} {walltime:>10.1f}"
+            )
             if "core_hours" in expts_dict[expt][task]:
                 task_ch = expts_dict[expt][task]["core_hours"]
                 ch += task_ch
-                expt_details[-1] = f'{expt_details[-1]}  {task_ch:>13.2f}'
+                expt_details[-1] = f"{expt_details[-1]}  {task_ch:>13.2f}"
             else:
-                expt_details[-1] = f'{expt_details[-1]}            -'
-        expt_details.append('-'*REPORT_WIDTH)
-        expt_details.append(f'Total {" "*(TASK_COLUMN_WIDTH - 6)}  {statuses[-1]:<12s} {" "*11} {ch:>13.2f}')
-        summary.append(f'{expt[:EXPT_COLUMN_WIDTH]:<{EXPT_COLUMN_WIDTH}s}  {statuses[-1]:<12s}  {ch:>13.2f}')
+                expt_details[-1] = f"{expt_details[-1]}            -"
+        expt_details.append("-" * REPORT_WIDTH)
+        expt_details.append(
+            f'Total {" "*(TASK_COLUMN_WIDTH - 6)}  {statuses[-1]:<12s} {" "*11} {ch:>13.2f}'
+        )
+        summary.append(
+            f"{expt[:EXPT_COLUMN_WIDTH]:<{EXPT_COLUMN_WIDTH}s}  {statuses[-1]:<12s}  {ch:>13.2f}"
+        )
         total_core_hours += ch
     if "ERROR" in statuses:
         total_status = "ERROR"
@@ -86,24 +95,29 @@ def print_WE2E_summary(expts_dict: dict, debug: bool = False):
         total_status = "COMPLETE"
     else:
         total_status = "UNKNOWN"
-    summary.append('-'*REPORT_WIDTH)
-    summary.append(f'Total {" "*(EXPT_COLUMN_WIDTH - 6)}  {total_status:<12s}  {total_core_hours:>13.2f}')
+    summary.append("-" * REPORT_WIDTH)
+    summary.append(
+        f'Total {" "*(EXPT_COLUMN_WIDTH - 6)}  {total_status:<12s}  {total_core_hours:>13.2f}'
+    )
 
     # Print summary to screen
     for line in summary:
         print(line)
 
     # Print summary and details to file
-    summary_file = os.path.join(os.path.dirname(expts_dict[expt]["expt_dir"]),
-                                f'WE2E_summary_{datetime.now().strftime("%Y%m%d%H%M%S")}.txt')
+    summary_file = os.path.join(
+        os.path.dirname(expts_dict[expt]["expt_dir"]),
+        f'WE2E_summary_{datetime.now().strftime("%Y%m%d%H%M%S")}.txt',
+    )
     print(f"\nDetailed summary written to {summary_file}\n")
 
-    with open(summary_file, 'w', encoding="utf-8") as f:
+    with open(summary_file, "w", encoding="utf-8") as f:
         for line in summary:
             f.write(f"{line}\n")
         f.write("\nDetailed summary of each experiment:\n")
         for line in expt_details:
             f.write(f"{line}\n")
+
 
 def create_expts_dict(expt_dir: str) -> dict:
     """
@@ -118,26 +132,27 @@ def create_expts_dict(expt_dir: str) -> dict:
     """
     contents = sorted(os.listdir(expt_dir))
 
-    expts_dict=dict()
+    expts_dict = dict()
     for item in contents:
         # Look for FV3LAM_wflow.xml to indicate directories with experiments in them
         fullpath = os.path.join(expt_dir, item)
         if not os.path.isdir(fullpath):
             continue
-        xmlfile = os.path.join(expt_dir, item, 'FV3LAM_wflow.xml')
+        xmlfile = os.path.join(expt_dir, item, "FV3LAM_wflow.xml")
         if os.path.isfile(xmlfile):
             expts_dict[item] = dict()
-            expts_dict[item].update({"expt_dir": os.path.join(expt_dir,item)})
+            expts_dict[item].update({"expt_dir": os.path.join(expt_dir, item)})
             expts_dict[item].update({"status": "CREATED"})
         else:
-            logging.debug(f'Skipping directory {item}, experiment XML file not found')
+            logging.debug(f"Skipping directory {item}, experiment XML file not found")
             continue
-        #Update the experiment dictionary
+        # Update the experiment dictionary
         logging.debug(f"Reading status of experiment {item}")
-        update_expt_status(expts_dict[item],item,True,False,False)
+        update_expt_status(expts_dict[item], item, True, False, False)
     summary_file = f'WE2E_tests_{datetime.now().strftime("%Y%m%d%H%M%S")}.yaml'
 
     return summary_file, expts_dict
+
 
 def calculate_core_hours(expts_dict: dict) -> dict:
     """
@@ -154,49 +169,60 @@ def calculate_core_hours(expts_dict: dict) -> dict:
 
     for expt in expts_dict:
         # Read variable definitions file
-        vardefs_file = os.path.join(expts_dict[expt]["expt_dir"],"var_defns.yaml")
+        vardefs_file = os.path.join(expts_dict[expt]["expt_dir"], "var_defns.yaml")
         if not os.path.isfile(vardefs_file):
-            logging.warning(f"\nWARNING: For experiment {expt}, variable definitions file")
-            logging.warning(f"{vardefs_file}\ndoes not exist!\n\nDropping experiment from summary")
+            logging.warning(
+                f"\nWARNING: For experiment {expt}, variable definitions file"
+            )
+            logging.warning(
+                f"{vardefs_file}\ndoes not exist!\n\nDropping experiment from summary"
+            )
             continue
-        logging.debug(f'Reading variable definitions file {vardefs_file}')
-        vardefs = load_yaml_config(vardefs_file)
+        logging.debug(f"Reading variable definitions file {vardefs_file}")
+        vardefs = get_yaml_config(vardefs_file)
         vdf = flatten_dict(vardefs)
         cores_per_node = vdf["NCORES_PER_NODE"]
         for task in expts_dict[expt]:
             # Skip non-task entries
-            if task in ["expt_dir","status","start_time","walltime"]:
+            if task in ["expt_dir", "status", "start_time", "walltime"]:
                 continue
             # Cycle is last 12 characters, task name is rest (minus separating underscore)
             taskname = task[:-13]
             # Handle task names that have ensemble and/or fhr info appended with regex
-            taskname = re.sub('_mem\d{3}', '', taskname)
-            taskname = re.sub('_f\d{3}', '', taskname)
-            nnodes_var = f'NNODES_{taskname.upper()}'
+            taskname = re.sub("_mem\d{3}", "", taskname)
+            taskname = re.sub("_f\d{3}", "", taskname)
+            nnodes_var = f"NNODES_{taskname.upper()}"
             if nnodes_var in vdf:
                 nnodes = vdf[nnodes_var]
                 # Users are charged for full use of nodes, so core hours = CPN * nodes * time in hrs
-                core_hours = cores_per_node * nnodes * expts_dict[expt][task]['walltime'] / 3600
-                expts_dict[expt][task]['exact_count'] = True
+                core_hours = (
+                    cores_per_node * nnodes * expts_dict[expt][task]["walltime"] / 3600
+                )
+                expts_dict[expt][task]["exact_count"] = True
             else:
                 # If we can't find the number of nodes, assume full usage (may undercount)
-                core_hours = expts_dict[expt][task]['cores'] * \
-                             expts_dict[expt][task]['walltime'] / 3600
-                expts_dict[expt][task]['exact_count'] = False
-            expts_dict[expt][task]['core_hours'] = round(core_hours,2)
+                core_hours = (
+                    expts_dict[expt][task]["cores"]
+                    * expts_dict[expt][task]["walltime"]
+                    / 3600
+                )
+                expts_dict[expt][task]["exact_count"] = False
+            expts_dict[expt][task]["core_hours"] = round(core_hours, 2)
     return expts_dict
 
 
 def write_monitor_file(monitor_file: str, expts_dict: dict):
     try:
-        with open(monitor_file,"w", encoding="utf-8") as f:
+        with open(monitor_file, "w", encoding="utf-8") as f:
             f.write("### WARNING ###\n")
-            f.write("### THIS FILE IS AUTO_GENERATED AND REGULARLY OVER-WRITTEN BY WORKFLOW SCRIPTS\n")
+            f.write(
+                "### THIS FILE IS AUTO_GENERATED AND REGULARLY OVER-WRITTEN BY WORKFLOW SCRIPTS\n"
+            )
             f.write("### EDITS MAY RESULT IN MISBEHAVIOR OF EXPERIMENTS RUNNING\n")
             f.writelines(cfg_to_yaml_str(expts_dict))
     except KeyboardInterrupt:
         logging.warning("\nRefusing to interrupt during file write; try again\n")
-        write_monitor_file(monitor_file,expts_dict)
+        write_monitor_file(monitor_file, expts_dict)
     except:
         logging.fatal("\n********************************\n")
         logging.fatal(f"WARNING WARNING WARNING\n")
@@ -206,8 +232,13 @@ def write_monitor_file(monitor_file: str, expts_dict: dict):
         raise
 
 
-def update_expt_status(expt: dict, name: str, refresh: bool = False, debug: bool = False,
-                       submit: bool = True) -> dict:
+def update_expt_status(
+    expt: dict,
+    name: str,
+    refresh: bool = False,
+    debug: bool = False,
+    submit: bool = True,
+) -> dict:
     """
     This function reads the dictionary showing the location of a given experiment, runs a
     `rocotorun` command to update the experiment (running new jobs and updating the status of
@@ -260,8 +291,8 @@ def update_expt_status(expt: dict, name: str, refresh: bool = False, debug: bool
         dict: The updated experiment dictionary.
     """
 
-    #If we are no longer tracking this experiment, return unchanged
-    if (expt["status"] in ['DEAD','ERROR','COMPLETE']) and not refresh:
+    # If we are no longer tracking this experiment, return unchanged
+    if (expt["status"] in ["DEAD", "ERROR", "COMPLETE"]) and not refresh:
         return expt
     # Update experiment, read rocoto database
     rocoto_db = f"{expt['expt_dir']}/FV3LAM_wflow.db"
@@ -270,35 +301,54 @@ def update_expt_status(expt: dict, name: str, refresh: bool = False, debug: bool
         if refresh:
             logging.debug(f"Updating database for experiment {name}")
         if debug:
-            rocotorun_cmd = ["rocotorun", f"-w {rocoto_xml}", f"-d {rocoto_db}", "-v 10"]
-            p = subprocess.run(rocotorun_cmd, stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, text=True)
+            rocotorun_cmd = [
+                "rocotorun",
+                f"-w {rocoto_xml}",
+                f"-d {rocoto_db}",
+                "-v 10",
+            ]
+            p = subprocess.run(
+                rocotorun_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
             logging.debug(p.stdout)
 
-            #Run rocotorun again to get around rocotobqserver proliferation issue
-            p = subprocess.run(rocotorun_cmd, stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, text=True)
+            # Run rocotorun again to get around rocotobqserver proliferation issue
+            p = subprocess.run(
+                rocotorun_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
             logging.debug(p.stdout)
         else:
             rocotorun_cmd = ["rocotorun", f"-w {rocoto_xml}", f"-d {rocoto_db}"]
             subprocess.run(rocotorun_cmd)
-            #Run rocotorun again to get around rocotobqserver proliferation issue
+            # Run rocotorun again to get around rocotobqserver proliferation issue
             subprocess.run(rocotorun_cmd)
 
-    logging.debug(f"Reading database for experiment {name}, updating experiment dictionary")
+    logging.debug(
+        f"Reading database for experiment {name}, updating experiment dictionary"
+    )
     try:
         # This section of code queries the "job" table of the rocoto database, returning a list
         # of tuples containing the taskname, cycle, and state of each job respectively
         with closing(sqlite3.connect(rocoto_db)) as connection:
             with closing(connection.cursor()) as cur:
-                db = cur.execute('SELECT taskname,cycle,state,cores,duration from jobs').fetchall()
+                db = cur.execute(
+                    "SELECT taskname,cycle,state,cores,duration from jobs"
+                ).fetchall()
     except:
         # Some platforms (including Hera) can have a problem with rocoto jobs not submitting
         # properly due to build-ups of background processes. This will resolve over time as
         # rocotorun continues to be called, so let's only treat this as an error if we are
         # past the first initial iteration of job submissions
         if not refresh:
-            logging.warning(f"Unable to read database {rocoto_db}\nCan not track experiment {name}")
+            logging.warning(
+                f"Unable to read database {rocoto_db}\nCan not track experiment {name}"
+            )
             expt["status"] = "ERROR"
 
         return expt
@@ -307,7 +357,7 @@ def update_expt_status(expt: dict, name: str, refresh: bool = False, debug: bool
         # For each entry from rocoto database, store that task's info under a dictionary key named
         # TASKNAME_CYCLE; Cycle comes from the database in Unix Time (seconds), so convert to
         # human-readable
-        cycle = datetime.utcfromtimestamp(task[1]).strftime('%Y%m%d%H%M')
+        cycle = datetime.utcfromtimestamp(task[1]).strftime("%Y%m%d%H%M")
         if f"{task[0]}_{cycle}" not in expt:
             expt[f"{task[0]}_{cycle}"] = dict()
         expt[f"{task[0]}_{cycle}"]["status"] = task[2]
@@ -317,15 +367,17 @@ def update_expt_status(expt: dict, name: str, refresh: bool = False, debug: bool
     statuses = list()
     for task in expt:
         # Skip non-task entries
-        if task in ["expt_dir","status","start_time","walltime"]:
+        if task in ["expt_dir", "status", "start_time", "walltime"]:
             continue
         statuses.append(expt[task]["status"])
 
     if "DEAD" in statuses:
         still_live = ["RUNNING", "SUBMITTING", "QUEUED", "FAILED"]
         if any(status in still_live for status in statuses):
-            logging.debug(f'DEAD job in experiment {name}; continuing to track until all jobs are '\
-                           'complete')
+            logging.debug(
+                f"DEAD job in experiment {name}; continuing to track until all jobs are "
+                "complete"
+            )
             expt["status"] = "DYING"
         else:
             expt["status"] = "DEAD"
@@ -348,33 +400,41 @@ def update_expt_status(expt: dict, name: str, refresh: bool = False, debug: bool
         # rocotorun continues to be called, so let's only print this warning message if we
         # are past the first initial iteration of job submissions
         if not refresh:
-            logging.warning(dedent(
-                f"""WARNING:Tasks have not yet been submitted for experiment {name};
+            logging.warning(
+                dedent(
+                    f"""WARNING:Tasks have not yet been submitted for experiment {name};
                 it could be that your jobs are being throttled at the system level.
 
                 If you continue to see this message, there may be an error with your
                 experiment configuration, such as an incorrect queue or account number.
 
                 You can use ctrl-c to pause this script and inspect log files.
-                """))
+                """
+                )
+            )
     else:
         logging.fatal("Some kind of horrible thing has happened")
-        raise ValueError(dedent(
-              f"""Some kind of horrible thing has happened to the experiment status
+        raise ValueError(
+            dedent(
+                f"""Some kind of horrible thing has happened to the experiment status
               for experiment {name}
               status is {expt["status"]}
-              all task statuses are {statuses}"""))
+              all task statuses are {statuses}"""
+            )
+        )
 
     # Final check for experiments where all tasks are "SUCCEEDED"; since the rocoto database does
     # not include info on jobs that have not been submitted yet, use rocotostat to check that
     # there are no un-submitted jobs remaining.
-    if expt["status"] in ["SUCCEEDED","STALLED","STUCK"]:
-        expt = compare_rocotostat(expt,name)
+    if expt["status"] in ["SUCCEEDED", "STALLED", "STUCK"]:
+        expt = compare_rocotostat(expt, name)
 
     return expt
 
-def update_expt_status_parallel(expts_dict: dict, procs: int, refresh: bool = False,
-                                debug: bool = False) -> dict:
+
+def update_expt_status_parallel(
+    expts_dict: dict, procs: int, refresh: bool = False, debug: bool = False
+) -> dict:
     """
     This function updates an entire set of experiments in parallel, drastically speeding up
     the process if given enough parallel processes. Given a dictionary of experiments, it will
@@ -396,7 +456,7 @@ def update_expt_status_parallel(expts_dict: dict, procs: int, refresh: bool = Fa
     args = []
     # Define a tuple of arguments to pass to starmap
     for expt in expts_dict:
-        args.append( (expts_dict[expt],expt,refresh,debug) )
+        args.append((expts_dict[expt], expt, refresh, debug))
 
     # call update_expt_status() in parallel
     with Pool(processes=procs) as pool:
@@ -411,7 +471,6 @@ def update_expt_status_parallel(expts_dict: dict, procs: int, refresh: bool = Fa
     return expts_dict
 
 
-
 def print_test_info(txtfile: str = "WE2E_test_info.txt") -> None:
     """Prints a pipe ( | ) delimited text file containing summaries of each test defined by a
     config file in test_configs/*
@@ -420,14 +479,14 @@ def print_test_info(txtfile: str = "WE2E_test_info.txt") -> None:
         txtfile (str): File name for test details file
     """
 
-    testfiles = glob.glob('test_configs/**/config*.yaml', recursive=True)
+    testfiles = glob.glob("test_configs/**/config*.yaml", recursive=True)
     testdict = dict()
     links = dict()
     for testfile in testfiles:
         # Calculate relative cost of test based on config settings using legacy script
         cost_array = calculate_cost(testfile)
         cost = cost_array[1] / cost_array[3]
-        #Decompose full file path into relevant bits
+        # Decompose full file path into relevant bits
         pathname, filename = os.path.split(testfile)
         testname = filename[7:-5]
         dirname = os.path.basename(os.path.normpath(pathname))
@@ -444,16 +503,20 @@ def print_test_info(txtfile: str = "WE2E_test_info.txt") -> None:
             testdict[testname] = load_config_file(testfile)
             testdict[testname]["directory"] = dirname
             testdict[testname]["cost"] = cost
-            #Calculate number of forecasts for a cycling run
-            if testdict[testname]['workflow']["DATE_FIRST_CYCL"] != \
-                    testdict[testname]['workflow']["DATE_LAST_CYCL"]:
-                begin = datetime.strptime(testdict[testname]['workflow']["DATE_FIRST_CYCL"],
-                                          '%Y%m%d%H')
-                end = datetime.strptime(testdict[testname]['workflow']["DATE_LAST_CYCL"],
-                                        '%Y%m%d%H')
+            # Calculate number of forecasts for a cycling run
+            if (
+                testdict[testname]["workflow"]["DATE_FIRST_CYCL"]
+                != testdict[testname]["workflow"]["DATE_LAST_CYCL"]
+            ):
+                begin = datetime.strptime(
+                    testdict[testname]["workflow"]["DATE_FIRST_CYCL"], "%Y%m%d%H"
+                )
+                end = datetime.strptime(
+                    testdict[testname]["workflow"]["DATE_LAST_CYCL"], "%Y%m%d%H"
+                )
                 diff = end - begin
                 diffh = diff.total_seconds() // 3600
-                nf = diffh // testdict[testname]['workflow']["INCR_CYCL_FREQ"]
+                nf = diffh // testdict[testname]["workflow"]["INCR_CYCL_FREQ"]
                 testdict[testname]["num_fcsts"] = nf
             else:
                 testdict[testname]["num_fcsts"] = 1
@@ -465,49 +528,59 @@ def print_test_info(txtfile: str = "WE2E_test_info.txt") -> None:
         testdict[link_name]["alternate_directory_name"] = alt_dirname
 
     # Print the file
-    with open(txtfile, 'w', encoding="utf-8") as f:
+    with open(txtfile, "w", encoding="utf-8") as f:
         # Field delimiter character
-        d = "\" | \""
+        d = '" | "'
         txt_output = ['"Test Name']
-        txt_output.append(f'(Subdirectory){d}Alternate Test Names')
-        txt_output.append(f'(Subdirectories){d}Test Purpose/Description{d}Relative Cost of Running Dynamics')
-        txt_output.append(f'(1 corresponds to running a 6-hour forecast on the RRFS_CONUS_25km predefined grid using the default time step){d}PREDEF_GRID_NAME{d}CCPP_PHYS_SUITE{d}EXTRN_MDL_NAME_ICS{d}EXTRN_MDL_NAME_LBCS{d}DATE_FIRST_CYCL{d}DATE_LAST_CYCL{d}INCR_CYCL_FREQ{d}FCST_LEN_HRS{d}DT_ATMOS{d}LBC_SPEC_INTVL_HRS{d}NUM_ENS_MEMBERS')
+        txt_output.append(f"(Subdirectory){d}Alternate Test Names")
+        txt_output.append(
+            f"(Subdirectories){d}Test Purpose/Description{d}Relative Cost of Running Dynamics"
+        )
+        txt_output.append(
+            f"(1 corresponds to running a 6-hour forecast on the RRFS_CONUS_25km predefined grid using the default time step){d}PREDEF_GRID_NAME{d}CCPP_PHYS_SUITE{d}EXTRN_MDL_NAME_ICS{d}EXTRN_MDL_NAME_LBCS{d}DATE_FIRST_CYCL{d}DATE_LAST_CYCL{d}INCR_CYCL_FREQ{d}FCST_LEN_HRS{d}DT_ATMOS{d}LBC_SPEC_INTVL_HRS{d}NUM_ENS_MEMBERS"
+        )
 
         for line in txt_output:
             f.write(f"{line}\n")
         for expt in testdict:
-            f.write(f"\"{expt}\n(")
+            f.write(f'"{expt}\n(')
             f.write(f"{testdict[expt]['directory']}){d}")
             if "alternate_name" in testdict[expt]:
-                f.write(f"{testdict[expt]['alternate_name']}\n"\
-                        f"({testdict[expt]['alternate_directory_name']}){d}")
+                f.write(
+                    f"{testdict[expt]['alternate_name']}\n"
+                    f"({testdict[expt]['alternate_directory_name']}){d}"
+                )
             else:
                 f.write(f"{d}\n")
-            desc = testdict[expt]['metadata']['description'].splitlines()
+            desc = testdict[expt]["metadata"]["description"].splitlines()
             for line in desc[:-1]:
                 f.write(f"    {line}\n")
             f.write(f"    {desc[-1]}")
-            #Write test relative cost and number of test forecasts (for cycling runs)
-            f.write(f"{d}'{round(testdict[expt]['cost'],2)}{d}'{round(testdict[expt]['num_fcsts'])}")
+            # Write test relative cost and number of test forecasts (for cycling runs)
+            f.write(
+                f"{d}'{round(testdict[expt]['cost'],2)}{d}'{round(testdict[expt]['num_fcsts'])}"
+            )
             # Bundle various variables with their corresponding sections for more compact coding
-            key_pairs = [ ('workflow', 'PREDEF_GRID_NAME'),
-                          ('workflow', 'CCPP_PHYS_SUITE'),
-                          ('task_get_extrn_ics', 'EXTRN_MDL_NAME_ICS'),
-                          ('task_get_extrn_lbcs', 'EXTRN_MDL_NAME_LBCS'),
-                          ('workflow', 'DATE_FIRST_CYCL'),
-                          ('workflow', 'DATE_LAST_CYCL'),
-                          ('workflow', 'INCR_CYCL_FREQ'),
-                          ('workflow', 'FCST_LEN_HRS'),
-                          ('task_run_fcst', 'DT_ATMOS'),
-                          ('task_get_extrn_lbcs', 'LBC_SPEC_INTVL_HRS'),
-                          ('global', 'NUM_ENS_MEMBERS') ]
+            key_pairs = [
+                ("workflow", "PREDEF_GRID_NAME"),
+                ("workflow", "CCPP_PHYS_SUITE"),
+                ("task_get_extrn_ics", "EXTRN_MDL_NAME_ICS"),
+                ("task_get_extrn_lbcs", "EXTRN_MDL_NAME_LBCS"),
+                ("workflow", "DATE_FIRST_CYCL"),
+                ("workflow", "DATE_LAST_CYCL"),
+                ("workflow", "INCR_CYCL_FREQ"),
+                ("workflow", "FCST_LEN_HRS"),
+                ("task_run_fcst", "DT_ATMOS"),
+                ("task_get_extrn_lbcs", "LBC_SPEC_INTVL_HRS"),
+                ("global", "NUM_ENS_MEMBERS"),
+            ]
 
             for key1, key2 in key_pairs:
                 f.write(f"{d}{testdict[expt].get(key1, {}).get(key2, '')}")
             f.write("\n")
 
 
-def compare_rocotostat(expt_dict,name):
+def compare_rocotostat(expt_dict, name):
     """Reads the dictionary showing the location of a given experiment, runs a `rocotostat` command
     to get the full set of tasks for the experiment, and compares the two to see if there are any
     unsubmitted tasks remaining.
@@ -517,27 +590,32 @@ def compare_rocotostat(expt_dict,name):
     rocoto_db = f"{expt_dict['expt_dir']}/FV3LAM_wflow.db"
     rocoto_xml = f"{expt_dict['expt_dir']}/FV3LAM_wflow.xml"
     rocotorun_cmd = ["rocotostat", f"-w {rocoto_xml}", f"-d {rocoto_db}", "-v 10"]
-    p = subprocess.run(rocotorun_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    p = subprocess.run(
+        rocotorun_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
     rsout = p.stdout
 
     # Parse each line of rocotostat output, extracting relevant information
     untracked_tasks = []
-    for line in rsout.split('\n'):
+    for line in rsout.split("\n"):
         # Skip blank lines and dividing lines of '=====...'
         if not line:
             continue
-        if line[0] == '=':
+        if line[0] == "=":
             continue
         line_array = line.split()
         # Skip header lines
-        if line_array[0] == 'CYCLE' or line_array[0] == '/apps/rocoto/1.3.3/lib/workflowmgr/launchserver.rb:40:':
+        if (
+            line_array[0] == "CYCLE"
+            or line_array[0] == "/apps/rocoto/1.3.3/lib/workflowmgr/launchserver.rb:40:"
+        ):
             continue
         # We should now just have lines describing jobs, in the form:
         # line_array = ['cycle','task','jobid','status','exit status','num tries','walltime']
 
         # As defined in update_expt_status(), the "task names" in the dictionary are a combination
         # of the task name and cycle
-        taskname = f'{line_array[1]}_{line_array[0]}'
+        taskname = f"{line_array[1]}_{line_array[0]}"
 
         # If we're already tracking this task, continue
         if expt_dict.get(taskname):
@@ -548,15 +626,17 @@ def compare_rocotostat(expt_dict,name):
 
     if untracked_tasks:
         # We want to give this a couple loops before reporting that it is "stuck"
-        if expt_dict['status'] == 'SUCCEEDED':
-            expt_dict['status'] = 'STALLED'
-        elif expt_dict['status'] == 'STALLED':
-            expt_dict['status'] = 'STUCK'
-        elif expt_dict['status'] == 'STUCK':
+        if expt_dict["status"] == "SUCCEEDED":
+            expt_dict["status"] = "STALLED"
+        elif expt_dict["status"] == "STALLED":
+            expt_dict["status"] = "STUCK"
+        elif expt_dict["status"] == "STUCK":
             msg = f"WARNING: For experiment {name}, there are jobs that are not being submitted:"
             for ut in untracked_tasks:
                 msg += ut
-            msg = msg + f"""WARNING: For experiment {name},
+            msg = (
+                msg
+                + f"""WARNING: For experiment {name},
                 there are some jobs that are not being submitted.
                 It could be that your jobs are being throttled at the system level, or
                 some task dependencies have not been met.
@@ -566,14 +646,18 @@ def compare_rocotostat(expt_dict,name):
 
                 You can use ctrl-c to pause this script and inspect log files.
                 """
+            )
             logging.warning(dedent(msg))
         else:
             logging.fatal("Some kind of horrible thing has happened")
-            raise ValueError(dedent(
-                  f"""Some kind of horrible thing has happened to the experiment status
+            raise ValueError(
+                dedent(
+                    f"""Some kind of horrible thing has happened to the experiment status
                   for experiment {name}
                   status is {expt_dict["status"]}
-                  untracked tasknames are {untracked_tasks}"""))
+                  untracked tasknames are {untracked_tasks}"""
+                )
+            )
     else:
         expt_dict["status"] = "COMPLETE"
 
