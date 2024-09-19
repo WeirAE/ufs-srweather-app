@@ -35,7 +35,7 @@ def create_diag_table_file(run_dir):
     # import all environment variables
     import_vars()
 
-    # pylint: disable=undefined-variable
+    #pylint: disable=undefined-variable
     # create a diagnostic table file within the specified run directory
     print_info_msg(
         f"""
@@ -75,10 +75,10 @@ def create_diag_table_file(run_dir):
     )
 
     render(
-        input_file=DIAG_TABLE_TMPL_FP,
-        output_file=diag_table_fp,
-        values_src=settings,
-    )
+        input_file = DIAG_TABLE_TMPL_FP,
+        output_file = diag_table_fp,
+        values_src = settings,
+        )
     return True
 
 

@@ -47,7 +47,6 @@ from set_gridparams_ESGgrid import set_gridparams_ESGgrid
 from set_gridparams_GFDLgrid import set_gridparams_GFDLgrid
 from uwtools.api.config import get_yaml_config
 
-
 def load_config_for_setup(ushdir, default_config, user_config):
     """Load in the default, machine, and user configuration files into
     Python dictionaries. Return the combined experiment dictionary.
@@ -79,9 +78,7 @@ def load_config_for_setup(ushdir, default_config, user_config):
 
     try:
         cfg_u = load_config_file(user_config)
-        logging.debug(
-            f"Read in the following values from YAML config file {user_config}:\n"
-        )
+        logging.debug(f"Read in the following values from YAML config file {user_config}:\n")
         logging.debug(cfg_u)
     except:
         errmsg = dedent(
@@ -107,9 +104,7 @@ def load_config_for_setup(ushdir, default_config, user_config):
         errmsg = f"Invalid key(s) specified in {user_config}:\n"
         for entry in invalid:
             errmsg = errmsg + f"{entry} = {invalid[entry]}\n"
-        errmsg = (
-            errmsg + f"\nCheck {default_config} for allowed user-specified variables\n"
-        )
+        errmsg = errmsg + f"\nCheck {default_config} for allowed user-specified variables\n"
         raise Exception(errmsg)
 
     # Mandatory variables *must* be set in the user's config; the default value is invalid
@@ -149,36 +144,36 @@ def load_config_for_setup(ushdir, default_config, user_config):
     # Load the constants file
     cfg_c = load_config_file(os.path.join(ushdir, "constants.yaml"))
 
+
     # Load the rocoto workflow default file
-    cfg_wflow = load_config_file(
-        os.path.join(ushdir, os.pardir, "parm", "wflow", "default_workflow.yaml")
-    )
+    cfg_wflow = load_config_file(os.path.join(ushdir, os.pardir, "parm",
+        "wflow", "default_workflow.yaml"))
 
     # Takes care of removing any potential "null" entries, i.e.,
     # unsetting a default value from an anchored default_task
     update_dict(cfg_wflow, cfg_wflow)
 
+
     # Take any user-specified taskgroups entry here.
-    taskgroups = cfg_u.get("rocoto", {}).get("tasks", {}).get("taskgroups")
+    taskgroups = cfg_u.get('rocoto', {}).get('tasks', {}).get('taskgroups')
     if taskgroups:
-        cfg_wflow["rocoto"]["tasks"]["taskgroups"] = taskgroups
+        cfg_wflow['rocoto']['tasks']['taskgroups'] = taskgroups
 
     # Extend yaml here on just the rocoto section to include the
     # appropriate groups of tasks
     extend_yaml(cfg_wflow)
 
+
     # Put the entries expanded under taskgroups in tasks
     rocoto_tasks = cfg_wflow["rocoto"]["tasks"]
-    cfg_wflow["rocoto"]["tasks"] = yaml.load(
-        rocoto_tasks.pop("taskgroups"), Loader=yaml.SafeLoader
-    )
+    cfg_wflow["rocoto"]["tasks"] = yaml.load(rocoto_tasks.pop("taskgroups"),Loader=yaml.SafeLoader)
 
     # Update wflow config from user one more time to make sure any of
     # the "null" settings are removed, i.e., tasks turned off.
-    update_dict(cfg_u.get("rocoto", {}), cfg_wflow["rocoto"])
+    update_dict(cfg_u.get('rocoto', {}), cfg_wflow["rocoto"])
 
     def add_jobname(tasks):
-        """Add the jobname entry for all the tasks in the workflow"""
+        """ Add the jobname entry for all the tasks in the workflow """
 
         if not isinstance(tasks, dict):
             return
@@ -187,12 +182,12 @@ def load_config_for_setup(ushdir, default_config, user_config):
             if task_type == "task":
                 # Use the provided attribute if it is present, otherwise use
                 # the name in the key
-                tasks[task]["jobname"] = (
-                    task_settings.get("attrs", {}).get("name")
-                    or task.split("_", maxsplit=1)[1]
-                )
+                tasks[task]["jobname"] = \
+                    task_settings.get("attrs", {}).get("name") or \
+                    task.split("_", maxsplit=1)[1]
             elif task_type == "metatask":
                 add_jobname(task_settings)
+
 
     # Add jobname entry to each remaining task
     add_jobname(cfg_wflow["rocoto"]["tasks"])
@@ -223,15 +218,13 @@ def load_config_for_setup(ushdir, default_config, user_config):
     update_dict(cfg_d, cfg_d)
 
     # Load one more if running Coupled AQM
-    if cfg_d["cpl_aqm_parm"]["CPL_AQM"]:
+    if cfg_d['cpl_aqm_parm']['CPL_AQM']:
         cfg_aqm = get_yaml_config(Path(ushdir, "config_defaults_aqm.yaml"))
         update_dict(cfg_aqm, cfg_d)
 
     # Load CCPP suite-specific settings
-    ccpp_suite = cfg_d["workflow"]["CCPP_PHYS_SUITE"]
-    ccpp_cfg = get_yaml_config(Path(ushdir, "ccpp_suites_defaults.yaml")).get(
-        ccpp_suite, {}
-    )
+    ccpp_suite = cfg_d['workflow']['CCPP_PHYS_SUITE']
+    ccpp_cfg = get_yaml_config(Path(ushdir, "ccpp_suites_defaults.yaml")).get(ccpp_suite, {})
     update_dict(ccpp_cfg, cfg_d)
 
     # Load external model-specific settings
@@ -304,6 +297,7 @@ def load_config_for_setup(ushdir, default_config, user_config):
 
 
 def set_srw_paths(ushdir, expt_config):
+
     """
     Generate a dictionary of directories that describe the SRW
     structure, i.e., where SRW is installed, and the paths to
@@ -444,6 +438,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
               fcst_len_hrs_max = {fcst_len_hrs_max}"""
         )
 
+
     #
     # -----------------------------------------------------------------------
     #
@@ -507,11 +502,11 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     # -----------------------------------------------------------------------
     #
 
-    rocoto_config = expt_config.get("rocoto", {})
+    rocoto_config = expt_config.get('rocoto', {})
     rocoto_tasks = rocoto_config.get("tasks")
-    run_make_grid = rocoto_tasks.get("task_make_grid") is not None
-    run_make_orog = rocoto_tasks.get("task_make_orog") is not None
-    run_make_sfc_climo = rocoto_tasks.get("task_make_sfc_climo") is not None
+    run_make_grid = rocoto_tasks.get('task_make_grid') is not None
+    run_make_orog = rocoto_tasks.get('task_make_orog') is not None
+    run_make_sfc_climo = rocoto_tasks.get('task_make_sfc_climo') is not None
 
     # Necessary tasks are turned on
     pregen_basedir = expt_config["platform"].get("DOMAIN_PREGEN_BASEDIR")
@@ -539,7 +534,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
             )
 
     def remove_tag(tasks, tag):
-        """Remove the tag for all the tasks in the workflow"""
+        """ Remove the tag for all the tasks in the workflow """
 
         if not isinstance(tasks, dict):
             return
@@ -555,10 +550,10 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     if remove_memory:
         remove_tag(rocoto_tasks, "memory")
 
-    for part in ["PARTITION_HPSS", "PARTITION_DEFAULT", "PARTITION_FCST"]:
+    for part in ['PARTITION_HPSS', 'PARTITION_DEFAULT', 'PARTITION_FCST']:
         partition = expt_config["platform"].get(part)
         if not partition:
-            remove_tag(rocoto_tasks, "partition")
+            remove_tag(rocoto_tasks, 'partition')
 
     # When not running subhourly post, remove those tasks, if they exist
     if not expt_config.get("task_run_post", {}).get("SUB_HOURLY_POST"):
@@ -576,37 +571,29 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     vx_metatasks_all = {}
 
     vx_fields_all["CCPA"] = ["APCP"]
-    vx_metatasks_all["CCPA"] = [
-        "metatask_PcpCombine_obs",
-        "metatask_PcpCombine_fcst_APCP_all_accums_all_mems",
-        "metatask_GridStat_CCPA_all_accums_all_mems",
-        "metatask_GenEnsProd_EnsembleStat_CCPA",
-        "metatask_GridStat_CCPA_ensmeanprob_all_accums",
-    ]
+    vx_metatasks_all["CCPA"] = ["metatask_PcpCombine_obs",
+                                "metatask_PcpCombine_fcst_APCP_all_accums_all_mems",
+                                "metatask_GridStat_CCPA_all_accums_all_mems",
+                                "metatask_GenEnsProd_EnsembleStat_CCPA",
+                                "metatask_GridStat_CCPA_ensmeanprob_all_accums"]
 
     vx_fields_all["NOHRSC"] = ["ASNOW"]
-    vx_metatasks_all["NOHRSC"] = [
-        "task_get_obs_nohrsc",
-        "metatask_PcpCombine_fcst_ASNOW_all_accums_all_mems",
-        "metatask_GridStat_NOHRSC_all_accums_all_mems",
-        "metatask_GenEnsProd_EnsembleStat_NOHRSC",
-        "metatask_GridStat_NOHRSC_ensmeanprob_all_accums",
-    ]
+    vx_metatasks_all["NOHRSC"] = ["task_get_obs_nohrsc",
+                                "metatask_PcpCombine_fcst_ASNOW_all_accums_all_mems",
+                                "metatask_GridStat_NOHRSC_all_accums_all_mems",
+                                "metatask_GenEnsProd_EnsembleStat_NOHRSC",
+                                "metatask_GridStat_NOHRSC_ensmeanprob_all_accums"]
 
     vx_fields_all["MRMS"] = ["REFC", "RETOP"]
-    vx_metatasks_all["MRMS"] = [
-        "metatask_GridStat_MRMS_all_mems",
-        "metatask_GenEnsProd_EnsembleStat_MRMS",
-        "metatask_GridStat_MRMS_ensprob",
-    ]
+    vx_metatasks_all["MRMS"] = ["metatask_GridStat_MRMS_all_mems",
+                                "metatask_GenEnsProd_EnsembleStat_MRMS",
+                                "metatask_GridStat_MRMS_ensprob"]
 
     vx_fields_all["NDAS"] = ["ADPSFC", "ADPUPA"]
-    vx_metatasks_all["NDAS"] = [
-        "task_run_MET_Pb2nc_obs",
-        "metatask_PointStat_NDAS_all_mems",
-        "metatask_GenEnsProd_EnsembleStat_NDAS",
-        "metatask_PointStat_NDAS_ensmeanprob",
-    ]
+    vx_metatasks_all["NDAS"] = ["task_run_MET_Pb2nc_obs",
+                                "metatask_PointStat_NDAS_all_mems",
+                                "metatask_GenEnsProd_EnsembleStat_NDAS",
+                                "metatask_PointStat_NDAS_ensmeanprob"]
 
     # Get the vx fields specified in the experiment configuration.
     vx_fields_config = expt_config["verification"]["VX_FIELDS"]
@@ -615,27 +602,23 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     # for all observation types.
     if not vx_fields_config:
         metatask = "metatask_check_post_output_all_mems"
-        rocoto_config["tasks"].pop(metatask)
+        rocoto_config['tasks'].pop(metatask)
 
     # If for a given obstype no fields are specified, remove all vx metatasks
     # for that obstype.
     for obstype in vx_fields_all:
-        vx_fields_obstype = [
-            field for field in vx_fields_config if field in vx_fields_all[obstype]
-        ]
+        vx_fields_obstype = [field for field in vx_fields_config if field in vx_fields_all[obstype]]
         if not vx_fields_obstype:
             for metatask in vx_metatasks_all[obstype]:
-                if metatask in rocoto_config["tasks"]:
-                    logging.info(
-                        dedent(
-                            f"""
+                if metatask in rocoto_config['tasks']:
+                    logging.info(dedent(
+                        f"""
                         Removing verification [meta]task
                           "{metatask}"
                         from workflow since no fields belonging to observation type "{obstype}"
                         are specified for verification."""
-                        )
-                    )
-                    rocoto_config["tasks"].pop(metatask)
+                    ))
+                    rocoto_config['tasks'].pop(metatask)
 
     #
     # -----------------------------------------------------------------------
@@ -701,13 +684,13 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
                       {data_key} = \"{basedir}\"'''
                 )
 
+
     # Make sure the vertical coordinate file for both make_lbcs and
     # make_ics is the same.
-    if ics_vcoord := expt_config.get("task_make_ics", {}).get("VCOORD_FILE") != (
-        lbcs_vcoord := expt_config.get("task_make_lbcs", {}).get("VCOORD_FILE")
-    ):
-        raise ValueError(
-            f"""
+    if ics_vcoord := expt_config.get("task_make_ics", {}).get("VCOORD_FILE") != \
+            (lbcs_vcoord := expt_config.get("task_make_lbcs", {}).get("VCOORD_FILE")):
+         raise ValueError(
+             f"""
              The VCOORD_FILE must be set to the same value for both the
              make_ics task and the make_lbcs task. They are currently
              set to:
@@ -718,7 +701,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
              make_lbcs:
                VCOORD_FILE: {lbcs_vcoord}
              """
-        )
+         )
 
     #
     # -----------------------------------------------------------------------
@@ -737,16 +720,14 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         dt = fcst_config.get("DT_ATMOS")
         if dt:
             if dt > 40:
-                logger.warning(
-                    dedent(
-                        f"""
+                logger.warning(dedent(
+                    f"""
                     WARNING: CCPP suite {workflow_config["CCPP_PHYS_SUITE"]} requires short
                     time step regardless of grid resolution. The user-specified value
                     DT_ATMOS = {fcst_config.get("DT_ATMOS")}
                     may result in CFL violations or other errors!
                     """
-                    )
-                )
+                ))
 
     # Gather the pre-defined grid parameters, if needed
     if workflow_config.get("PREDEF_GRID_NAME"):
@@ -767,19 +748,14 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
                     continue
                 # DT_ATMOS needs special treatment based on CCPP suite
                 elif param == "DT_ATMOS":
-                    if (
-                        workflow_config["CCPP_PHYS_SUITE"] in hires_ccpp_suites
-                        and grid_params[param] > 40
-                    ):
-                        logger.warning(
-                            dedent(
-                                f"""
+                    if workflow_config["CCPP_PHYS_SUITE"] in hires_ccpp_suites and grid_params[param] > 40:
+                        logger.warning(dedent(
+                            f"""
                             WARNING: CCPP suite {workflow_config["CCPP_PHYS_SUITE"]} requires short
                             time step regardless of grid resolution; setting DT_ATMOS to 40.\n
                             This value can be overwritten in the user config file.
                             """
-                            )
-                        )
+                        ))
                         fcst_config[param] = 40
                     else:
                         fcst_config[param] = value
@@ -808,19 +784,19 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         if 24 / incr_cycl_freq != len(fcst_len_cycl):
             # Also allow for the possibility that the user is running
             # cycles for less than a day:
-            num_cycles = len(
-                set_cycle_dates(date_first_cycl, date_last_cycl, incr_cycl_freq)
-            )
+            num_cycles = len(set_cycle_dates(
+                date_first_cycl,
+                date_last_cycl,
+                incr_cycl_freq))
 
             if num_cycles != len(fcst_len_cycl):
-                logger.error(
-                    f""" The number of entries in FCST_LEN_CYCL does
+              logger.error(f""" The number of entries in FCST_LEN_CYCL does
               not divide evenly into a 24 hour day or the number of cycles
               in your experiment! 
                 FCST_LEN_CYCL = {fcst_len_cycl}
               """
-                )
-                raise ValueError
+              )
+              raise ValueError
 
         # Build cycledefs entries for the long forecasts
         # Short forecast cycles will be relevant to all intended
@@ -834,7 +810,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         # Find the entries that match the long forecast, and map them to
         # their time of day.
         long_fcst_len = max(fcst_len_cycl)
-        long_indices = [i for i, x in enumerate(fcst_len_cycl) if x == long_fcst_len]
+        long_indices = [i for i,x in enumerate(fcst_len_cycl) if x == long_fcst_len]
         long_cycles = [i * incr_cycl_freq for i in long_indices]
 
         # add one forecast entry per cycle per day
@@ -843,9 +819,9 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         for hh in long_cycles:
             first = date_first_cycl.replace(hour=hh).strftime("%Y%m%d%H")
             last = date_last_cycl.replace(hour=hh).strftime("%Y%m%d%H")
-            fcst_cdef.append(f"{first}00 {last}00 24:00:00")
+            fcst_cdef.append(f'{first}00 {last}00 24:00:00')
 
-        rocoto_config["cycledefs"]["long_forecast"] = fcst_cdef
+        rocoto_config['cycledefs']['long_forecast'] = fcst_cdef
 
     # check the availability of restart intervals for restart capability of forecast
     do_fcst_restart = fcst_config.get("DO_FCST_RESTART")
@@ -1067,6 +1043,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     # -----------------------------------------------------------------------
     #
 
+
     # If using external CRTM fix files to allow post-processing of synthetic
     # satellite products from the UPP, make sure the CRTM fix file directory exists.
     if global_sect.get("USE_CRTM"):
@@ -1126,9 +1103,8 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         # Update the rocoto string for the fcst output location if
         # running an ensemble in nco mode
         if global_sect["DO_ENSEMBLE"]:
-            rocoto_config["entities"][
-                "FCST_DIR"
-            ] = "{{ nco.PTMP }}/{{ nco.envir_default }}/tmp/run_fcst_mem#mem#.{{ workflow.WORKFLOW_ID }}_@Y@m@d@H"
+            rocoto_config["entities"]["FCST_DIR"] = \
+                "{{ nco.PTMP }}/{{ nco.envir_default }}/tmp/run_fcst_mem#mem#.{{ workflow.WORKFLOW_ID }}_@Y@m@d@H"
 
     # create experiment dir
     mkdir_vrfy(f' -p "{exptdir}"')
@@ -1199,14 +1175,13 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     # -----------------------------------------------------------------------
     #
     # Get list of all top-level tasks and metatasks in the workflow.
-    task_defs = rocoto_config.get("tasks")
+    task_defs = rocoto_config.get('tasks')
     all_tasks = [task for task in task_defs]
 
     # Get list of all valid top-level tasks and metatasks pertaining to ensemble
     # verification.
     ens_vx_task_defns = load_config_file(
-        os.path.join(USHdir, os.pardir, "parm", "wflow", "verify_ens.yaml")
-    )
+      os.path.join(USHdir, os.pardir, "parm", "wflow", "verify_ens.yaml"))
     ens_vx_valid_tasks = [task for task in ens_vx_task_defns]
 
     # Get list of all valid top-level tasks and metatasks in the workflow that
@@ -1219,24 +1194,14 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     do_ensemble = global_sect["DO_ENSEMBLE"]
     if (not do_ensemble) and ens_vx_tasks:
         task_str = "    " + "\n    ".join(ens_vx_tasks)
-        msg = dedent(
-            f"""
+        msg = dedent(f"""
               Ensemble verification can not be run unless running in ensemble mode:
                   DO_ENSEMBLE = \"{do_ensemble}\"
               Ensemble verification tasks:
-              """
-        )
-        msg = "".join(
-            [
-                msg,
-                task_str,
-                dedent(
-                    f"""
+              """)
+        msg = "".join([msg, task_str, dedent(f"""
               Please set DO_ENSEMBLE to True or remove ensemble vx tasks from the
-              workflow."""
-                ),
-            ]
-        )
+              workflow.""")])
         raise Exception(msg)
 
     #
@@ -1274,14 +1239,18 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     run_make_ics = dict_find(rocoto_tasks, "task_make_ics")
     run_make_lbcs = dict_find(rocoto_tasks, "task_make_lbcs")
     run_run_fcst = dict_find(rocoto_tasks, "task_run_fcst")
-    run_any_coldstart_task = run_make_ics or run_make_lbcs or run_run_fcst
+    run_any_coldstart_task = run_make_ics or \
+                             run_make_lbcs or \
+                             run_run_fcst
     # Flags for creating symlinks to pre-generated grid, orography, and sfc_climo files.
     # These consider dependencies of other tasks on each pre-processing task.
     create_symlinks_to_pregen_files = {
-        "GRID": (not run_make_grid)
-        and (run_make_orog or run_make_sfc_climo or run_any_coldstart_task),
-        "OROG": (not run_make_orog) and (run_make_sfc_climo or run_any_coldstart_task),
-        "SFC_CLIMO": (not run_make_sfc_climo) and (run_make_ics or run_make_lbcs),
+      "GRID": (not run_make_grid) and \
+              (run_make_orog or run_make_sfc_climo or run_any_coldstart_task),
+      "OROG": (not run_make_orog) and \
+              (run_make_sfc_climo or run_any_coldstart_task),
+      "SFC_CLIMO": (not run_make_sfc_climo) and \
+                   (run_make_ics or run_make_lbcs),
     }
 
     fixed_files = expt_config["fixed_files"]
@@ -1370,7 +1339,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     #
     if fcst_config["WRITE_DOPOST"]:
         # Turn off run_post
-        task_name = "metatask_run_ens_post"
+        task_name = 'metatask_run_ens_post'
         removed_task = task_defs.pop(task_name, None)
         if removed_task:
             logger.warning(
@@ -1395,49 +1364,33 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
     ccpp_suite_xml = load_xml_file(workflow_config["CCPP_PHYS_SUITE_IN_CCPP_FP"])
 
     # Need to track if we are using RUC LSM for the make_ics step
-    workflow_config["SDF_USES_RUC_LSM"] = has_tag_with_value(
-        ccpp_suite_xml, "scheme", "lsm_ruc"
-    )
+    workflow_config["SDF_USES_RUC_LSM"] = has_tag_with_value(ccpp_suite_xml, "scheme", "lsm_ruc")
 
     # Thompson microphysics needs additional input files and namelist settings
-    workflow_config["SDF_USES_THOMPSON_MP"] = has_tag_with_value(
-        ccpp_suite_xml, "scheme", "mp_thompson"
-    )
+    workflow_config["SDF_USES_THOMPSON_MP"] = has_tag_with_value(ccpp_suite_xml, "scheme", "mp_thompson")
 
     if workflow_config["SDF_USES_THOMPSON_MP"]:
-
-        logging.debug(
-            f'Selected CCPP suite ({workflow_config["CCPP_PHYS_SUITE"]}) uses Thompson MP'
-        )
-        logging.debug(f"Setting up links for additional fix files")
+    
+        logging.debug(f'Selected CCPP suite ({workflow_config["CCPP_PHYS_SUITE"]}) uses Thompson MP')
+        logging.debug(f'Setting up links for additional fix files')
 
         # If the model ICs or BCs are not from RAP or HRRR, they will not contain aerosol
         # climatology data needed by the Thompson scheme, so we need to provide a separate file
-        if get_extrn_ics["EXTRN_MDL_NAME_ICS"] not in ["HRRR", "RAP"] or get_extrn_lbcs[
-            "EXTRN_MDL_NAME_LBCS"
-        ] not in ["HRRR", "RAP"]:
-            fixed_files["THOMPSON_FIX_FILES"].append(
-                workflow_config["THOMPSON_MP_CLIMO_FN"]
-            )
+        if (get_extrn_ics["EXTRN_MDL_NAME_ICS"] not in ["HRRR", "RAP"] or
+           get_extrn_lbcs["EXTRN_MDL_NAME_LBCS"] not in ["HRRR", "RAP"]):
+            fixed_files["THOMPSON_FIX_FILES"].append(workflow_config["THOMPSON_MP_CLIMO_FN"])
 
         # Add thompson-specific fix files to CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING and
         # FIXgsm_FILES_TO_COPY_TO_FIXam; see parm/fixed_files_mapping.yaml for more info on these variables
 
-        fixed_files["FIXgsm_FILES_TO_COPY_TO_FIXam"].extend(
-            fixed_files["THOMPSON_FIX_FILES"]
-        )
+        fixed_files["FIXgsm_FILES_TO_COPY_TO_FIXam"].extend(fixed_files["THOMPSON_FIX_FILES"])
 
         for fix_file in fixed_files["THOMPSON_FIX_FILES"]:
-            fixed_files["CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING"].append(
-                f"{fix_file} | {fix_file}"
-            )
+            fixed_files["CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING"].append(f"{fix_file} | {fix_file}")
 
-        logging.debug(
-            f'New fix file list:\n{fixed_files["FIXgsm_FILES_TO_COPY_TO_FIXam"]=}'
-        )
-        logging.debug(
-            f'New fix file mapping:\n{fixed_files["CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING"]=}'
-        )
+        logging.debug(f'New fix file list:\n{fixed_files["FIXgsm_FILES_TO_COPY_TO_FIXam"]=}')
+        logging.debug(f'New fix file mapping:\n{fixed_files["CYCLEDIR_LINKS_TO_FIXam_FILES_MAPPING"]=}')
+
 
     #
     # -----------------------------------------------------------------------
@@ -1486,6 +1439,7 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         var_defns_cfg["workflow"][dates] = date_to_str(var_defns_cfg["workflow"][dates])
     var_defns_cfg.dump(Path(global_var_defns_fp))
 
+
     #
     # -----------------------------------------------------------------------
     #
@@ -1500,32 +1454,27 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
         if v is None or v == "":
             continue
         vkey = "valid_vals_" + k
-        if vkey in cfg_v:
-            if type(v) == list:
-                if not (all(ele in cfg_v[vkey] for ele in v)):
+        if (vkey in cfg_v):
+            if (type(v) == list):
+                if not(all(ele in cfg_v[vkey] for ele in v)):
                     raise Exception(
-                        dedent(
-                            f"""
+                        dedent(f"""
                         The variable
                             {k} = {v}
                         in the user's configuration has at least one invalid value.  Possible values are:
                             {k} = {cfg_v[vkey]}"""
-                        )
-                    )
+                    ))
             else:
                 if not (v in cfg_v[vkey]):
                     raise Exception(
-                        dedent(
-                            f"""
+                        dedent(f"""
                         The variable
                             {k} = {v} ({type(v)})
                         in the user's configuration does not have a valid value.  Possible values are:
                             {k} = {cfg_v[vkey]}"""
-                        )
-                    )
+                    ))
 
     return expt_config
-
 
 def clean_rocoto_dict(rocotodict):
     """Removes any invalid entries from rocotodict. Examples of invalid entries are:
@@ -1540,9 +1489,7 @@ def clean_rocoto_dict(rocotodict):
         elif key.split("_", maxsplit=1)[0] in ["task"]:
             if not rocotodict[key].get("command"):
                 popped = rocotodict.pop(key)
-                logging.warning(
-                    f"Invalid task {key} removed due to empty/unset run command"
-                )
+                logging.warning(f"Invalid task {key} removed due to empty/unset run command")
                 logging.debug(f"Removed entry:\n{popped}")
 
     # Loop 2: search for metatasks with no tasks in them
@@ -1552,7 +1499,7 @@ def clean_rocoto_dict(rocotodict):
             for key2 in list(rocotodict[key].keys()):
                 if key2.split("_", maxsplit=1)[0] == "metatask":
                     clean_rocoto_dict(rocotodict[key][key2])
-                    # After above recursion, any nested empty metatasks will have popped themselves
+                    #After above recursion, any nested empty metatasks will have popped themselves
                     if rocotodict[key].get(key2):
                         valid = True
                 elif key2.split("_", maxsplit=1)[0] == "task":
@@ -1561,6 +1508,7 @@ def clean_rocoto_dict(rocotodict):
                 popped = rocotodict.pop(key)
                 logging.warning(f"Invalid/empty metatask {key} removed")
                 logging.debug(f"Removed entry:\n{popped}")
+
 
 
 #
