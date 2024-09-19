@@ -1695,9 +1695,17 @@ task_make_ics:
   FVCOM_FILE: "fvcom.nc"
   VCOORD_FILE: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
   #------------------------------------------------------------------------
-  rundir: '{{ workflow.EXPTDIR }}/make_ics' 
   input_files_metadata_path: "{{ task_get_extrn_ics.rundir }}/{{ workflow.EXTRN_MDL_VAR_DEFNS_FN }}"
   chgres_cube:
+    execution:
+      executable: "{{ user.EXECdir }}/chgres_cube"
+      envcmds:
+        - module use {{ user.HOMEdir }}/modulefiles
+        - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
+      mpiargs:
+        - "--export=NONE"
+      mpicmd: '{{ platform.BATCH_RUN_CMD }}'
+      threads: 1
     namelist:
       update_values:
         config:
@@ -1718,12 +1726,12 @@ task_make_ics:
           convert_sfc: true
           convert_nst: true
           regional: 1
-          halo_bndy: "{{ constants.NH4 }}"
-          halo_blend: "{{ global.HALO_BLEND }}"
+          halo_bndy: !int "{{ constants.NH4 }}"
+          halo_blend: !int "{{ global.HALO_BLEND }}"
           input_type: "gaussian_nemsio" 
           external_model: "FV3GFS"
-          tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]"
-          tracers: "[\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]"
+          tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+          tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
           nsoill_out: 4
           vgtyp_from_climo: true
           sotyp_from_climo: true
@@ -1731,6 +1739,7 @@ task_make_ics:
           minmax_vgfrc_from_climo: true
           lai_from_climo: true
           tg3_from_soil: false
+    rundir: '{{ workflow.EXPTDIR }}/make_ics'
 
 #----------------------------
 # MAKE LBCS config parameters
@@ -1757,8 +1766,16 @@ task_make_lbcs:
   OMP_STACKSIZE_MAKE_LBCS: "1024m"
   VCOORD_FILE: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
   #------------------------------------------------------------------------
-  rundir: '{{ workflow.EXPTDIR }}/make_lbcs'
   chgres_cube:
+    execution:
+      executable: "{{ user.EXECdir }}/chgres_cube"
+      envcmds:
+        - module use {{ user.HOMEdir }}/modulefiles
+        - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
+      mpiargs:
+        - "--export=NONE"
+      mpicmd: '{{ platform.BATCH_RUN_CMD }}'
+      threads: 1
     namelist:
       update_values:
         config:
@@ -1776,12 +1793,13 @@ task_make_lbcs:
           cycle_hour: !int "{{ cycle.strftime('%H') }}"
           convert_atm: true
           regional: 2
-          halo_bndy: "{{ constants.NH4 }}"
-          halo_blend: "{{ global.HALO_BLEND }}"
+          halo_bndy: !int "{{ constants.NH4 }}"
+          halo_blend: !int "{{ global.HALO_BLEND }}"
           input_type: "gaussian_nemsio" 
           external_model: "FV3GFS"
-          tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]"
-          tracers: "[\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]"
+          tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+          tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
+    rundir: '{{ workflow.EXPTDIR }}/make_lbcs'
 
 
 #----------------------------

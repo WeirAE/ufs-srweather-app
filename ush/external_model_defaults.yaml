@@ -14,15 +14,15 @@ GSMGFS:
       input_type: "gfs_gaussian_nemsio"
       external_model: "GSMGFS"
       convert_nst: False
-      tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\"]"
-      tracers: "[\"sphum\",\"liq_wat\",\"o3mr\"]"
+      tracers_input: [\"spfh\",\"clwmr\",\"o3mr\"]
+      tracers: [\"sphum\",\"liq_wat\",\"o3mr\"]
   task_make_lbcs:
     chgres_cube:
       input_type: "gfs_gaussian_nemsio"
       external_model: "GSMGFS"
       convert_nst: False
-      tracers_input: "[\"spfh\",\"clwmr\",\"o3mr\"]"
-      tracers: "[\"sphum\",\"liq_wat\",\"o3mr\"]"
+      tracers_input: [\"spfh\",\"clwmr\",\"o3mr\"]
+      tracers: [\"sphum\",\"liq_wat\",\"o3mr\"]
 
 UFS-CASE-STUDY:
   task_make_ics:

@@ -62,7 +62,7 @@ chgres_cube_driver = ChgresCube(
 
 # update fn_atm and fn_sfc for ics task
 if args.key_path == "task_make_ics":
-    rundir = Path(chgres_cube_config["task_make_ics"]["rundir"])
+    rundir = Path(chgres_cube_config["task_make_ics"]["chgres_cube"]["rundir"])
     print(f"Will run in {rundir}")
     varsfilepath = chgres_cube_driver.config["task_make_ics"][
         "input_files_metadata_path"
@@ -77,7 +77,7 @@ if args.key_path == "task_make_ics":
 
 # Loop the run of chgres_cube for the forecast length if lbcs
 else:
-    rundir = Path(chgres_cube_config["task_make_lbcs"]["rundir"])
+    rundir = Path(chgres_cube_config["task_make_lbcs"]["chgres_cube"]["rundir"])
     print(f"Will run in {rundir}")
     fn_sfc = ""
     num_fhrs = chgres_cube_driver.config["workflow"]["FCST_LEN_HRS"]
