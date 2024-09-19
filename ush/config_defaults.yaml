@@ -911,7 +911,7 @@ workflow:
   #
   #-----------------------------------------------------------------------
   #
-  GRID_GEN_METHOD: ""
+  GRID_GEN_METHOD: ESGgrid
   #
   #-----------------------------------------------------------------------
   #
@@ -1378,47 +1378,88 @@ task_make_grid:
 #----------------------------
 # MAKE OROG config parameters
 #-----------------------------
-#-----------------------------------------------------------------------
-# KMP_AFFINITY_MAKE_OROG: 
-# Intel Thread Affinity Interface for the make_orog task. 
-# Settings for this task are disabled because this task does not use 
-# parallelized code.
-#
-# OMP_NUM_THREADS_MAKE_OROG: 
-# The number of OpenMP threads to use for parallel regions.
-#
-# OMP_STACKSIZE_MAKE_OROG: 
-# Controls the size of the stack for threads created by the OpenMP 
-# implementation.
-#
-# OROG_DIR: 
-# The directory containing pre-generated orography files to use when 
-# the MAKE_OROG task is not meant to run.
-#-----------------------------------------------------------------------
 task_make_orog:
-  KMP_AFFINITY_MAKE_OROG: "disabled"
-  OMP_NUM_THREADS_MAKE_OROG: 6
-  OMP_STACKSIZE_MAKE_OROG: "2048m"
-  OROG_DIR: '{{ workflow.EXPTDIR + "/orog" if rocoto.tasks.get("task_make_orog") else "" }}'
-
-#----------------------------
-# MAKE SFC CLIMO config parameters
-#-----------------------------
-#-----------------------------------------------------------------------
-# KMP_AFFINITY_MAKE_SFC_CLIMO: 
-# Intel Thread Affinity Interface for the make_sfc_climo task. 
-#
-# OMP_NUM_THREADS_MAKE_SFC_CLIMO: 
-# The number of OpenMP threads to use for parallel regions.
-#
-# OMP_STACKSIZE_MAKE_SFC_CLIMO: 
-# Controls the size of the stack for threads created by the OpenMP 
-# implementation.
-#
-# SFC_CLIMO_DIR: 
-# The directory containing pre-generated surface climatology files 
-# to use when the MAKE_SFC_CLIMO task is not meant to run.
-#-----------------------------------------------------------------------
+  rundir: '{{ workflow.EXPTDIR }}/orog'
+  orog:
+    execution:
+      batchargs:
+        nodes: 1
+        tasks_per_node: 24
+        walltime: 00:10:00
+      threads: 6
+      executable: "{{ user.EXECdir }}/orog"
+      envcmds:
+        - module use {{ user.HOMEdir }}/modulefiles
+        - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
+    files_to_link:
+      fort.15: "{{ platform.FIXorg }}/thirty.second.antarctic.new.bin"
+      landcover30.fixed: "{{ platform.FIXorg }}/landcover30.fixed"
+      fort.235: "{{ platform.FIXorg }}/gmted2010.30sec.int"
+    old_line1_items:
+      mtnres: 1
+      lonb: 0
+      latb: 0
+      jcap: 0
+      nr: 0
+      nf1: 0
+      nf2: 0
+      efac: 0
+      blat: 0
+    grid_file: "{{ workflow.FIXlam }}/{{ 'CRES' | env }}_grid.tile7.halo{{ grid_params.NHW }}.nc"
+    orog_file: "none"
+    rundir: "{{ task_make_orog.rundir }}/orog"
+  filter_topo:
+    config:
+      filtered_orog: "{{ 'CRES' | env }}_filtered_orog.tile{{ constants.TILE_RGNL }}.nc"
+      input_grid_file: "{{ workflow.FIXlam }}/{{ 'CRES' | env }}_grid.tile7.halo{{ grid_params.NHW }}.nc"
+      input_raw_orog: "{{ task_make_orog.orog.rundir }}/out.oro.nc"
+    execution:
+      batchargs:
+        nodes: 1
+        tasks_per_node: 1
+        walltime: 00:05:00
+      executable: "{{ user.EXECdir }}/filter_topo"
+      envcmds:
+        - module use {{ user.HOMEdir }}/modulefiles
+        - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
+    namelist:
+      update_values:
+        filter_topo_nml:
+          grid_file: "{{ workflow.FIXlam }}/{{ 'CRES' | env }}_mosaic.halo{{ grid_params.NHW }}.nc"
+          topo_file: "{{ task_make_orog.filter_topo.rundir }}/{{ 'CRES' | env }}_filtered_orog"
+          mask_field: land_frac
+          regional: true
+          stretch_fac: !float "{{ grid_params.STRETCH_FAC }}"
+          res: !int "{{ ('CRES' | env)[1:] }}"
+    rundir: "{{ task_make_orog.rundir }}/filtered_topo"
+  shave0:
+    shave:
+      execution: &shave_execution
+        batchargs:
+          nodes: 1
+          tasks_per_node: 1
+          walltime: 00:05:00
+        executable: "{{ user.EXECdir }}/shave"
+        envcmds:
+          - module use {{ user.HOMEdir }}/modulefiles
+          - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
+      config: &shave_config
+        input_grid_file: "{{ task_make_orog.filtered_output }}"
+        output_grid_file: "{{ task_make_orog.rundir }}/{{ 'CRES' | env }}_oro_data.tile{{ constants.TILE_RGNL }}.halo{{ constants.NH0 }}.nc"
+        nhalo: !int "{{ constants.NH0 }}"
+        nx: !int "{{ grid_params.NX }}"
+        ny: !int "{{ grid_params.NY }}"
+      rundir: "{{ task_make_orog.rundir }}/shave0"
+  shave4:
+    shave:
+      execution:
+        <<: *shave_execution
+      config:
+        <<: *shave_config
+        nhalo: !int "{{ constants.NH4 }}"
+        output_grid_file: "{{ task_make_orog.rundir }}/{{ 'CRES' | env }}_oro_data.tile{{ constants.TILE_RGNL }}.halo{{ constants.NH4 }}.nc"
+      rundir: "{{ task_make_orog.rundir }}/shave4"
+  filtered_output: "{{ task_make_orog.filter_topo.rundir }}/{{ task_make_orog.filter_topo.config.filtered_orog }}"
 task_make_sfc_climo:
   KMP_AFFINITY_MAKE_SFC_CLIMO: "scatter"
   OMP_NUM_THREADS_MAKE_SFC_CLIMO: 1
@@ -2053,7 +2094,7 @@ task_run_post:
         tasks_per_node: 24
         walltime: 00:15:00
       envcmds:
-        - module load {{ user.HOMEdir }}/modulefiles
+        - module use {{ user.HOMEdir }}/modulefiles
         - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
       executable: '{{ user.EXECdir }}/upp.x'
       mpicmd: '{{ platform.BATCH_RUN_CMD }}'

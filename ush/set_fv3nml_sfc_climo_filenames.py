@@ -10,16 +10,16 @@ import re
 import sys
 from textwrap import dedent
 
-from uwtools.api.config import get_nml_config, get_yaml_config, realize
-
 from python_utils import (
     cfg_to_yaml_str,
     check_var_valid_value,
     flatten_dict,
     import_vars,
-    load_yaml_config,
     print_info_msg,
 )
+
+from uwtools.api.config import get_nml_config, get_yaml_config, realize
+
 
 VERBOSE = os.environ.get("VERBOSE", "true")
 

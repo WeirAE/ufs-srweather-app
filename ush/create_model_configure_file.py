@@ -7,8 +7,6 @@ import argparse
 import os
 import sys
 from textwrap import dedent
-from uwtools.api.config import get_yaml_config
-from uwtools.api.template import render
 
 from python_utils import (
     cfg_to_yaml_str,
@@ -19,6 +17,9 @@ from python_utils import (
     print_input_args,
     str_to_type,
 )
+
+from uwtools.api.config import get_yaml_config
+from uwtools.api.template import render
 
 
 def create_model_configure_file(

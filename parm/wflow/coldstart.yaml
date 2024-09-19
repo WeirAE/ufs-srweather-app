@@ -113,7 +113,7 @@ metatask_run_ensemble:
           datadep_orog:
             attrs:
               age: 00:00:00:05
-            text: '{{ task_make_orog.OROG_DIR }}/make_orog_task_complete.txt'
+            text: '{{ task_make_orog.rundir }}/make_orog_task_complete.txt'
           streq:
             left: staged_orog
             right: '{% if not rocoto.get("tasks", {}).get("task_make_orog") %}staged_orog{% endif %}'

@@ -223,15 +223,13 @@ def load_config_for_setup(ushdir, default_config, user_config):
     update_dict(cfg_d, cfg_d)
 
     # Load one more if running Coupled AQM
-    if cfg_d["cpl_aqm_parm"]["CPL_AQM"]:
-        cfg_aqm = get_yaml_config("config_defaults_aqm.yaml")
+    if cfg_d['cpl_aqm_parm']['CPL_AQM']:
+        cfg_aqm = get_yaml_config(Path(ushdir, "config_defaults_aqm.yaml"))
         update_dict(cfg_aqm, cfg_d)
 
     # Load CCPP suite-specific settings
-    ccpp_suite = cfg_d["workflow"]["CCPP_PHYS_SUITE"]
-    ccpp_cfg = get_yaml_config(Path(ushdir, "ccpp_suites_defaults.yaml")).get(
-        ccpp_suite, {}
-    )
+    ccpp_suite = cfg_d['workflow']['CCPP_PHYS_SUITE']
+    ccpp_cfg = get_yaml_config(Path(ushdir, "ccpp_suites_defaults.yaml")).get(ccpp_suite, {})
     update_dict(ccpp_cfg, cfg_d)
 
     # Load external model-specific settings
@@ -1357,7 +1355,8 @@ def setup(USHdir, user_config_fn="config.yaml", debug: bool = False):
                 )
 
     workflow_config["RES_IN_FIXLAM_FILENAMES"] = res_in_fixlam_filenames
-    workflow_config["CRES"] = f"C{res_in_fixlam_filenames}"
+    if res_in_fixlam_filenames:
+        workflow_config["CRES"] = f"C{res_in_fixlam_filenames}"
 
     #
     # -----------------------------------------------------------------------

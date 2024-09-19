@@ -10,8 +10,6 @@ import os
 import sys
 from textwrap import dedent
 
-from uwtools.api.config import get_nml_config, realize
-
 from python_utils import (
     cfg_to_yaml_str,
     import_vars,
@@ -19,6 +17,8 @@ from python_utils import (
     print_input_args,
     print_info_msg,
 )
+
+from uwtools.api.config import get_nml_config, realize
 
 
 def set_fv3nml_ens_stoch_seeds(cdate, expt_config):
