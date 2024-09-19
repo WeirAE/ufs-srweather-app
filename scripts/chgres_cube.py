@@ -9,9 +9,9 @@ from argparse import ArgumentParser
 from copy import deepcopy
 from pathlib import Path
 
-from uwtools.api.chgres_cube import Chgres_Cube
+from uwtools.api.chgres_cube import ChgresCube
 from uwtools.api.config import get_sh_config, get_yaml_config
-from uwtools.api.file import link as uwlink
+from uwtools.api.fs import link as uwlink
 
 
 parser = ArgumentParser(
@@ -49,15 +49,12 @@ os.environ["member"] = args.member
 expt_config = get_yaml_config(args.config_file)
 chgres_cube_config = expt_config[args.key_path]
 
-rundir = Path(chgres_cube_config["rundir"])
-print(f"Will run in {rundir}")
-
 CRES = expt_config["workflow"]["CRES"]
 os.environ["CRES"] = CRES
 
 
 # Extract driver config from experiment config
-chgres_cube_driver = Chgres_Cube(
+chgres_cube_driver = ChgresCube(
     config=args.config_file,
     cycle=args.cycle,
     key_path=[args.key_path],
@@ -65,6 +62,8 @@ chgres_cube_driver = Chgres_Cube(
 
 # update fn_atm and fn_sfc for ics task
 if args.key_path == "task_make_ics":
+    rundir = Path(chgres_cube_config["task_make_ics"]["rundir"])
+    print(f"Will run in {rundir}")
     varsfilepath = chgres_cube_driver.config["task_make_ics"][
         "input_files_metadata_path"
     ]
@@ -78,6 +77,8 @@ if args.key_path == "task_make_ics":
 
 # Loop the run of chgres_cube for the forecast length if lbcs
 else:
+    rundir = Path(chgres_cube_config["task_make_lbcs"]["rundir"])
+    print(f"Will run in {rundir}")
     fn_sfc = ""
     num_fhrs = chgres_cube_driver.config["workflow"]["FCST_LEN_HRS"]
     bcgrp10 = 0
@@ -92,7 +93,7 @@ else:
                 "config"
             ]["atm_files_input_grid"] = fn_atm
             # reinstantiate driver
-            chgres_cube_driver = Chgres_Cube(
+            chgres_cube_driver = ChgresCube(
                 config=expt_config,
                 cycle=args.cycle,
                 key_path=[args.key_path],

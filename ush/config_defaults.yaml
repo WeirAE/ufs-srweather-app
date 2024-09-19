@@ -1695,6 +1695,7 @@ task_make_ics:
   FVCOM_FILE: "fvcom.nc"
   VCOORD_FILE: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
   #------------------------------------------------------------------------
+  rundir: '{{ workflow.EXPTDIR }}/make_ics' 
   input_files_metadata_path: "{{ task_get_extrn_ics.rundir }}/{{ workflow.EXTRN_MDL_VAR_DEFNS_FN }}"
   chgres_cube:
     namelist:
@@ -1756,6 +1757,7 @@ task_make_lbcs:
   OMP_STACKSIZE_MAKE_LBCS: "1024m"
   VCOORD_FILE: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
   #------------------------------------------------------------------------
+  rundir: '{{ workflow.EXPTDIR }}/make_lbcs'
   chgres_cube:
     namelist:
       update_values:
