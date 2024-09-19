@@ -223,13 +223,15 @@ def load_config_for_setup(ushdir, default_config, user_config):
     update_dict(cfg_d, cfg_d)
 
     # Load one more if running Coupled AQM
-    if cfg_d['cpl_aqm_parm']['CPL_AQM']:
+    if cfg_d["cpl_aqm_parm"]["CPL_AQM"]:
         cfg_aqm = get_yaml_config(Path(ushdir, "config_defaults_aqm.yaml"))
         update_dict(cfg_aqm, cfg_d)
 
     # Load CCPP suite-specific settings
-    ccpp_suite = cfg_d['workflow']['CCPP_PHYS_SUITE']
-    ccpp_cfg = get_yaml_config(Path(ushdir, "ccpp_suites_defaults.yaml")).get(ccpp_suite, {})
+    ccpp_suite = cfg_d["workflow"]["CCPP_PHYS_SUITE"]
+    ccpp_cfg = get_yaml_config(Path(ushdir, "ccpp_suites_defaults.yaml")).get(
+        ccpp_suite, {}
+    )
     update_dict(ccpp_cfg, cfg_d)
 
     # Load external model-specific settings
