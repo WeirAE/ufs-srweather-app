@@ -182,7 +182,7 @@ def calculate_core_hours(expts_dict: dict) -> dict:
                 f"{vardefs_file}\ndoes not exist!\n\nDropping experiment from summary"
             )
             continue
-        logging.debug(f'Reading variable definitions file {vardefs_file}')
+        logging.debug(f"Reading variable definitions file {vardefs_file}")
         vardefs = get_yaml_config(vardefs_file)
         vdf = flatten_dict(vardefs)
         cores_per_node = vdf["NCORES_PER_NODE"]
