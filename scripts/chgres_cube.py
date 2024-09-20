@@ -12,6 +12,7 @@ from pathlib import Path
 from uwtools.api.chgres_cube import ChgresCube
 from uwtools.api.config import get_sh_config, get_yaml_config
 from uwtools.api.fs import link as uwlink
+from uwtools.api.logging import use_uwtools_logger
 
 
 parser = ArgumentParser(
@@ -42,6 +43,7 @@ parser.add_argument(
     default="000",
     help="The 3-digit ensemble member number.",
 )
+use_uwtools_logger()
 args = parser.parse_args()
 
 os.environ["member"] = args.member
@@ -49,9 +51,9 @@ os.environ["member"] = args.member
 expt_config = get_yaml_config(args.config_file)
 chgres_cube_config = expt_config[args.key_path]
 
+# dereference expressions during driver initialization
 CRES = expt_config["workflow"]["CRES"]
 os.environ["CRES"] = CRES
-
 
 # Extract driver config from experiment config
 chgres_cube_driver = ChgresCube(
