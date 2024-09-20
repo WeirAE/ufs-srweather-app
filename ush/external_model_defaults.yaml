@@ -1,12 +1,11 @@
 grib2_defaults: &grib2_defaults
-  chgres_cube:
-    namelist:
-      update_values:
-        config:
-          input_type: "grib2"
-          convert_nst: False
-          tracers_input: ""
-          tracers: ""
+  namelist:
+    update_values:
+      config:
+        input_type: "grib2"
+        convert_nst: False
+        tracers_input: ""
+        tracers: ""
 
 GSMGFS:
   task_make_ics:

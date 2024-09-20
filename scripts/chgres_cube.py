@@ -62,9 +62,9 @@ chgres_cube_driver = ChgresCube(
 
 # update fn_atm and fn_sfc for ics task
 if args.key_path == "task_make_ics":
-    rundir = Path(chgres_cube_config["task_make_ics"]["chgres_cube"]["rundir"])
+    rundir = Path(chgres_cube_driver.config["rundir"])
     print(f"Will run in {rundir}")
-    varsfilepath = chgres_cube_driver.config["task_make_ics"][
+    varsfilepath = expt_config["task_make_ics"][
         "input_files_metadata_path"
     ]
     extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
@@ -77,10 +77,10 @@ if args.key_path == "task_make_ics":
 
 # Loop the run of chgres_cube for the forecast length if lbcs
 else:
-    rundir = Path(chgres_cube_config["task_make_lbcs"]["chgres_cube"]["rundir"])
+    rundir = Path(chgres_cube_driver.config["rundir"])
     print(f"Will run in {rundir}")
     fn_sfc = ""
-    num_fhrs = chgres_cube_driver.config["workflow"]["FCST_LEN_HRS"]
+    num_fhrs = expt_config["workflow"]["FCST_LEN_HRS"]
     bcgrp10 = 0
     bcgrpnum10 = 1
     for ii in range(bcgrp10, num_fhrs, bcgrpnum10):
@@ -89,7 +89,7 @@ else:
             print(f"group ${bcgrp10} processes member ${i}")
             fn_atm = f"${{EXTRN_MDL_FNS[${i}]}}"
 
-            expt_config["task_make_lbcs"]["chgres_cube"]["namelist"]["update_values"][
+            chgres_cube_driver.config["namelist"]["update_values"][
                 "config"
             ]["atm_files_input_grid"] = fn_atm
             # reinstantiate driver
@@ -128,10 +128,10 @@ for label in chgres_cube_config["output_file_labels"]:
     lbc_block = expt_config_cp[args.key_path]
     lbc_input_fn = "gfs.bndy.nc"
     lbc_spec_fhrs = extrn_config_fhrs[i]
-    lbc_offset_fhrs = chgres_cube_driver.config["task_get_extrn_lbcs"][
+    lbc_offset_fhrs = expt_config["task_get_extrn_lbcs"][
         "EXTRN_MDL_LBCS_OFFSET_HRS"
     ]
-    nco_net = chgres_cube_driver.config["nco"]["NET_default"]
+    nco_net = expt_config["nco"]["NET_default"]
     dot_ensmem = f".mem{ args.member }"
     fcst_hhh = lbc_spec_fhrs - lbc_offset_fhrs
     fcst_hhh_FV3LAM = print(f"fcst_hhh:03d")

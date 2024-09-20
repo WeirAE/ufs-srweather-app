@@ -1695,7 +1695,7 @@ task_make_ics:
   FVCOM_FILE: "fvcom.nc"
   VCOORD_FILE: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
   #------------------------------------------------------------------------
-  input_files_metadata_path: "{{ task_get_extrn_ics.rundir }}/{{ workflow.EXTRN_MDL_VAR_DEFNS_FN }}"
+  input_files_metadata_path: '{{ workflow.EXPTDIR }}/{{ timevars.yyyymmddhh }}/{{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }}/for_ICS{{ "/mem%s" % ("MEMBER"|env) if global.DO_ENSEMBLE }}/{{ workflow.EXTRN_MDL_VAR_DEFNS_FN }}'
   chgres_cube:
     execution:
       executable: "{{ user.EXECdir }}/chgres_cube"
@@ -1766,6 +1766,7 @@ task_make_lbcs:
   OMP_STACKSIZE_MAKE_LBCS: "1024m"
   VCOORD_FILE: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
   #------------------------------------------------------------------------
+  input_files_metadata_path: '{{ workflow.EXPTDIR }}/{{ timevars.yyyymmddhh }}/{{ task_get_extrn_lbcs.EXTRN_MDL_NAME_LBCS }}/for_LBCS{{ "/mem%s" % ("MEMBER"|env) if global.DO_ENSEMBLE }}/{{ workflow.EXTRN_MDL_VAR_DEFNS_FN }}'
   chgres_cube:
     execution:
       executable: "{{ user.EXECdir }}/chgres_cube"
