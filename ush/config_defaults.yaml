@@ -1739,7 +1739,7 @@ task_make_ics:
           minmax_vgfrc_from_climo: true
           lai_from_climo: true
           tg3_from_soil: false
-    rundir: '{{ workflow.EXPTDIR }}/make_ics'
+    rundir: '{{ task_run_fcst.rundir }}/tmp_MAKE_ICS'
 
 #----------------------------
 # MAKE LBCS config parameters
@@ -1800,7 +1800,7 @@ task_make_lbcs:
           external_model: "FV3GFS"
           tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
           tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
-    rundir: '{{ workflow.EXPTDIR }}/make_lbcs'
+    rundir: '{{ task_run_fcst.rundir }}/tmp_MAKE_LBCS'
 
 
 #----------------------------

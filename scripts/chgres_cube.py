@@ -62,6 +62,9 @@ chgres_cube_driver = ChgresCube(
     key_path=[args.key_path],
 )
 
+extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
+extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
+
 # update fn_atm and fn_sfc for ics task
 if args.key_path == "task_make_ics":
     rundir = Path(chgres_cube_driver.config["rundir"])
@@ -69,8 +72,6 @@ if args.key_path == "task_make_ics":
     varsfilepath = expt_config["task_make_ics"][
         "input_files_metadata_path"
     ]
-    extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
-    extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
 
     fn_atm = extrn_config_fns[0]
     fn_sfc = extrn_config_fns[1]
@@ -82,18 +83,23 @@ else:
     rundir = Path(chgres_cube_driver.config["rundir"])
     print(f"Will run in {rundir}")
     fn_sfc = ""
-    num_fhrs = expt_config["workflow"]["FCST_LEN_HRS"]
+    num_fhrs = len(extrn_config_fhrs)
     bcgrp10 = 0
     bcgrpnum10 = 1
     for ii in range(bcgrp10, num_fhrs, bcgrpnum10):
-        i = ii + bcgrpnum10
+        i = ii + bcgrp10
         if i < num_fhrs:
-            print(f"group ${bcgrp10} processes member ${i}")
-            fn_atm = f"${{EXTRN_MDL_FNS[${i}]}}"
+            print(f"group {bcgrp10} processes member {i}")
+            fn_atm = extrn_config_fns[i]
+            fn_grib2 = extrn_config_fns[i]
 
             chgres_cube_driver.config["namelist"]["update_values"][
                 "config"
             ]["atm_files_input_grid"] = fn_atm
+            chgres_cube_driver.config["namelist"]["update_values"][
+                "config"
+            ]["grib2_files_input_grid"] = fn_grib2
+
             # reinstantiate driver
             chgres_cube_driver = ChgresCube(
                 config=expt_config,
