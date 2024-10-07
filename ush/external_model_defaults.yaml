@@ -1,11 +1,8 @@
-grib2_defaults: &grib2_defaults
-  namelist:
-    update_values:
-      config:
-        input_type: "grib2"
-        convert_nst: False
-        tracers_input: ""
-        tracers: ""
+grib2_default_config: &grib2_default_config
+  input_type: "grib2"
+  convert_nst: False
+  tracers_input: []
+  tracers: []
 
 GSMGFS:
   task_make_ics:
@@ -62,35 +59,35 @@ GDAS:
 GEFS:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "GFS"
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "GFS"
 
 HRRR:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "HRRR"
               geogrid_file_input_grid: "{{ workflow.FIXgsm }}/geo_em.d01.nc_HRRRX"
               tg3_from_soil: True
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "HRRR"
               geogrid_file_input_grid: "{{ workflow.FIXgsm }}/geo_em.d01.nc_HRRRX"
               tg3_from_soil: True
@@ -98,19 +95,19 @@ HRRR:
 RAP:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "RAP"
               geogrid_file_input_grid: "{{ workflow.FIXgsm }}/geo_em.d01.nc_RAPX"
               tg3_from_soil: True
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "RAP"
               geogrid_file_input_grid: "{{ workflow.FIXgsm }}/geo_em.d01.nc_RAPX"
               tg3_from_soil: True
@@ -118,15 +115,15 @@ RAP:
 NAM:
   task_make_ics:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "NAM"
   task_make_lbcs:
     chgres_cube:
-      <<: *grib2_defaults
       namelist:
           update_values:
             config:
+              <<: *grib2_default_config
               external_model: "NAM"

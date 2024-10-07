@@ -62,6 +62,14 @@ chgres_cube_driver = ChgresCube(
     key_path=[args.key_path],
 )
 
+# Dereference cycle for file paths
+expt_config = get_yaml_config(deepcopy(expt_config.data))
+expt_config.dereference(
+    context={
+        "cycle": args.cycle,
+        **expt_config,
+    }
+)
 
 # update fn_atm and fn_sfc for ics task
 if args.key_path == "task_make_ics":
@@ -73,8 +81,13 @@ if args.key_path == "task_make_ics":
     extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
     extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
 
-    fn_atm = extrn_config_fns[0]
-    fn_sfc = extrn_config_fns[1]
+    if chgres_cube_driver.config["namelist"]["update_values"][
+        "config"
+    ]["input_type"] == "grib2":
+        fn_grib2 = extrn_config_fns[0]
+    else:
+        fn_atm = extrn_config_fns[0]
+        fn_sfc = extrn_config_fns[1]
 
     chgres_cube_driver.run()
 
@@ -86,6 +99,7 @@ else:
     varsfilepath = expt_config["task_make_lbcs"][
         "input_files_metadata_path"
     ]
+    extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
     extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
     num_fhrs = len(extrn_config_fhrs)
     bcgrp10 = 0
