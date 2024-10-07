@@ -62,8 +62,6 @@ chgres_cube_driver = ChgresCube(
     key_path=[args.key_path],
 )
 
-extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
-extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
 
 # update fn_atm and fn_sfc for ics task
 if args.key_path == "task_make_ics":
@@ -72,6 +70,8 @@ if args.key_path == "task_make_ics":
     varsfilepath = expt_config["task_make_ics"][
         "input_files_metadata_path"
     ]
+    extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
+    extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
 
     fn_atm = extrn_config_fns[0]
     fn_sfc = extrn_config_fns[1]
@@ -83,6 +83,10 @@ else:
     rundir = Path(chgres_cube_driver.config["rundir"])
     print(f"Will run in {rundir}")
     fn_sfc = ""
+    varsfilepath = expt_config["task_make_lbcs"][
+        "input_files_metadata_path"
+    ]
+    extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
     num_fhrs = len(extrn_config_fhrs)
     bcgrp10 = 0
     bcgrpnum10 = 1
