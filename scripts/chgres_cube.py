@@ -12,6 +12,7 @@ from pathlib import Path
 from uwtools.api.chgres_cube import ChgresCube
 from uwtools.api.config import get_sh_config, get_yaml_config
 from uwtools.api.fs import link as uwlink
+from uwtools.api.logging import use_uwtools_logger
 
 
 parser = ArgumentParser(
@@ -42,6 +43,7 @@ parser.add_argument(
     default="000",
     help="The 3-digit ensemble member number.",
 )
+use_uwtools_logger()
 args = parser.parse_args()
 
 os.environ["member"] = args.member
@@ -49,9 +51,9 @@ os.environ["member"] = args.member
 expt_config = get_yaml_config(args.config_file)
 chgres_cube_config = expt_config[args.key_path]
 
+# dereference expressions during driver initialization
 CRES = expt_config["workflow"]["CRES"]
 os.environ["CRES"] = CRES
-
 
 # Extract driver config from experiment config
 chgres_cube_driver = ChgresCube(
@@ -60,38 +62,62 @@ chgres_cube_driver = ChgresCube(
     key_path=[args.key_path],
 )
 
+# Dereference cycle for file paths
+expt_config = get_yaml_config(deepcopy(expt_config.data))
+expt_config.dereference(
+    context={
+        "cycle": args.cycle,
+        **expt_config,
+    }
+)
+
 # update fn_atm and fn_sfc for ics task
 if args.key_path == "task_make_ics":
-    rundir = Path(chgres_cube_config["task_make_ics"]["chgres_cube"]["rundir"])
+    rundir = Path(chgres_cube_driver.config["rundir"])
     print(f"Will run in {rundir}")
-    varsfilepath = chgres_cube_driver.config["task_make_ics"][
+    varsfilepath = expt_config["task_make_ics"][
         "input_files_metadata_path"
     ]
     extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
     extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
 
-    fn_atm = extrn_config_fns[0]
-    fn_sfc = extrn_config_fns[1]
+    if chgres_cube_driver.config["namelist"]["update_values"][
+        "config"
+    ]["input_type"] == "grib2":
+        fn_grib2 = extrn_config_fns[0]
+    else:
+        fn_atm = extrn_config_fns[0]
+        fn_sfc = extrn_config_fns[1]
 
     chgres_cube_driver.run()
 
 # Loop the run of chgres_cube for the forecast length if lbcs
 else:
-    rundir = Path(chgres_cube_config["task_make_lbcs"]["chgres_cube"]["rundir"])
+    rundir = Path(chgres_cube_driver.config["rundir"])
     print(f"Will run in {rundir}")
     fn_sfc = ""
-    num_fhrs = chgres_cube_driver.config["workflow"]["FCST_LEN_HRS"]
+    varsfilepath = expt_config["task_make_lbcs"][
+        "input_files_metadata_path"
+    ]
+    extrn_config_fns = get_sh_config(varsfilepath)["EXTRN_MDL_FNS"]
+    extrn_config_fhrs = get_sh_config(varsfilepath)["EXTRN_MDL_FHRS"]
+    num_fhrs = len(extrn_config_fhrs)
     bcgrp10 = 0
     bcgrpnum10 = 1
     for ii in range(bcgrp10, num_fhrs, bcgrpnum10):
-        i = ii + bcgrpnum10
+        i = ii + bcgrp10
         if i < num_fhrs:
-            print(f"group ${bcgrp10} processes member ${i}")
-            fn_atm = f"${{EXTRN_MDL_FNS[${i}]}}"
+            print(f"group {bcgrp10} processes member {i}")
+            fn_atm = extrn_config_fns[i]
+            fn_grib2 = extrn_config_fns[i]
 
-            expt_config["task_make_lbcs"]["chgres_cube"]["namelist"]["update_values"][
+            chgres_cube_driver.config["namelist"]["update_values"][
                 "config"
             ]["atm_files_input_grid"] = fn_atm
+            chgres_cube_driver.config["namelist"]["update_values"][
+                "config"
+            ]["grib2_files_input_grid"] = fn_grib2
+
             # reinstantiate driver
             chgres_cube_driver = ChgresCube(
                 config=expt_config,
@@ -128,10 +154,10 @@ for label in chgres_cube_config["output_file_labels"]:
     lbc_block = expt_config_cp[args.key_path]
     lbc_input_fn = "gfs.bndy.nc"
     lbc_spec_fhrs = extrn_config_fhrs[i]
-    lbc_offset_fhrs = chgres_cube_driver.config["task_get_extrn_lbcs"][
+    lbc_offset_fhrs = expt_config["task_get_extrn_lbcs"][
         "EXTRN_MDL_LBCS_OFFSET_HRS"
     ]
-    nco_net = chgres_cube_driver.config["nco"]["NET_default"]
+    nco_net = expt_config["nco"]["NET_default"]
     dot_ensmem = f".mem{ args.member }"
     fcst_hhh = lbc_spec_fhrs - lbc_offset_fhrs
     fcst_hhh_FV3LAM = print(f"fcst_hhh:03d")

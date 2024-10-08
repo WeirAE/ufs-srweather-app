@@ -1,4 +1,4 @@
-chgres_cube_gsd_defaults: &chgres_cube_gsd_defaults
+gsd_defaults: &gsd_defaults
   namelist:
     update_values:
       config:
