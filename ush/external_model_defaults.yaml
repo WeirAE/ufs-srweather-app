@@ -1,8 +1,23 @@
 grib2_default_config: &grib2_default_config
   input_type: "grib2"
   convert_nst: False
-  tracers_input: []
-  tracers: []
+
+
+FV3GFS:
+  task_make_ics:
+    chgres_cube:
+        namelist:
+          update_values:
+            config:
+              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
+  task_make_lbcs:
+    chgres_cube:
+        namelist:
+          update_values:
+            config:
+              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
 
 GSMGFS:
   task_make_ics:
@@ -33,12 +48,16 @@ UFS-CASE-STUDY:
         update_values:
           config:
             external_model: "UFS-CASE-STUDY"
+            tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+            tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
   task_make_lbcs:
     chgres_cube:
         namelist:
           update_values:
             config:
               external_model: "UFS-CASE-STUDY"
+              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
 
 GDAS:
   task_make_ics:
@@ -47,6 +66,8 @@ GDAS:
           update_values:
             config:
               external_model: "GFS"
+              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
               tg3_from_soil: True
   task_make_lbcs:
     chgres_cube:
@@ -54,6 +75,8 @@ GDAS:
           update_values:
             config:
               external_model: "GFS"
+              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
+              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
               tg3_from_soil: True
 
 GEFS:

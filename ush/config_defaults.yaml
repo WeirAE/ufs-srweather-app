@@ -1716,9 +1716,6 @@ task_make_ics:
           vcoord_file_target_grid: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
           data_dir_input_grid: "{{ task_make_lbcs.chgres_cube.run_dir }}"
-          atm_files_input_grid: ""
-          sfc_files_input_grid': ""
-          grib2_file_input_grid: ""
           cycle_mon: !int "{{ cycle.strftime('%m') }}"
           cycle_day: !int "{{ cycle.strftime('%d') }}"
           cycle_hour: !int "{{ cycle.strftime('%H') }}"
@@ -1730,8 +1727,6 @@ task_make_ics:
           halo_blend: !int "{{ global.HALO_BLEND }}"
           input_type: "gaussian_nemsio" 
           external_model: "FV3GFS"
-          tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-          tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
           nsoill_out: 4
           vgtyp_from_climo: true
           sotyp_from_climo: true
@@ -1787,8 +1782,6 @@ task_make_lbcs:
           vcoord_file_target_grid: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
           data_dir_input_grid: "{{ task_make_lbcs.chgres_cube.run_dir }}"
-          atm_files_input_grid: ""
-          grib2_file_input_grid: ""
           cycle_mon: !int "{{ cycle.strftime('%m') }}"
           cycle_day: !int "{{ cycle.strftime('%d') }}"
           cycle_hour: !int "{{ cycle.strftime('%H') }}"
@@ -1798,8 +1791,6 @@ task_make_lbcs:
           halo_blend: !int "{{ global.HALO_BLEND }}"
           input_type: "gaussian_nemsio" 
           external_model: "FV3GFS"
-          tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-          tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
     rundir: '{{ task_run_fcst.rundir }}/tmp_MAKE_LBCS'
 
 
