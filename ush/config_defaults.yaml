@@ -1703,7 +1703,7 @@ task_make_ics:
         - module use {{ user.HOMEdir }}/modulefiles
         - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
       mpiargs:
-        - "--export=NONE"
+        - "--ntasks $SLURM_CPUS_ON_NODE"
       mpicmd: '{{ platform.BATCH_RUN_CMD }}'
       threads: 1
     namelist:
@@ -1715,7 +1715,7 @@ task_make_ics:
           orog_files_target_grid: "{{ 'CRES' | env }}{{ workflow.DOT_OR_USCORE }}oro_data.tile{{ constants.TILE_RGNL }}.halo{{ constants.NH4 }}.nc"
           vcoord_file_target_grid: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
-          data_dir_input_grid: "{{ task_make_lbcs.chgres_cube.run_dir }}"
+          data_dir_input_grid: "{{ task_make_ics.chgres_cube.rundir }}"
           cycle_mon: !int "{{ cycle.strftime('%m') }}"
           cycle_day: !int "{{ cycle.strftime('%d') }}"
           cycle_hour: !int "{{ cycle.strftime('%H') }}"
@@ -1735,7 +1735,6 @@ task_make_ics:
           lai_from_climo: true
           tg3_from_soil: false
     rundir: '{{ task_run_fcst.rundir }}/tmp_MAKE_ICS'
-
 #----------------------------
 # MAKE LBCS config parameters
 #-----------------------------
@@ -1769,7 +1768,7 @@ task_make_lbcs:
         - module use {{ user.HOMEdir }}/modulefiles
         - module load build_{{ user.MACHINE|lower }}_{{ workflow.COMPILER }}
       mpiargs:
-        - "--export=NONE"
+        - "--ntasks $SLURM_CPUS_ON_NODE"
       mpicmd: '{{ platform.BATCH_RUN_CMD }}'
       threads: 1
     namelist:
@@ -1781,7 +1780,7 @@ task_make_lbcs:
           orog_files_target_grid: "{{ 'CRES' | env }}{{ workflow.DOT_OR_USCORE }}oro_data.tile{{ constants.TILE_RGNL }}.halo{{ constants.NH4 }}.nc"
           vcoord_file_target_grid: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
-          data_dir_input_grid: "{{ task_make_lbcs.chgres_cube.run_dir }}"
+          data_dir_input_grid: "{{ task_make_lbcs.chgres_cube.rundir }}"
           cycle_mon: !int "{{ cycle.strftime('%m') }}"
           cycle_day: !int "{{ cycle.strftime('%d') }}"
           cycle_hour: !int "{{ cycle.strftime('%H') }}"
@@ -1791,9 +1790,7 @@ task_make_lbcs:
           halo_blend: !int "{{ global.HALO_BLEND }}"
           input_type: "gaussian_nemsio" 
           external_model: "FV3GFS"
-    rundir: '{{ task_run_fcst.rundir }}/tmp_MAKE_LBCS'
-
-
+    rundir: '{{ task_run_fcst.rundir}}/tmp_MAKE_LBCS'
 #----------------------------
 # IO_LAYOUT_Y FORECAST config parameters
 #-----------------------------

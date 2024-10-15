@@ -1,8 +1,8 @@
-gsd_defaults: &gsd_defaults
+gsd_defaults: &chgres_cube_gsd_defaults
   namelist:
     update_values:
       config:
-        varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
+        varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GSDphys_var_map.txt"
 
 orog_gsl_defaults: &orog_gsl_defaults
   config:
