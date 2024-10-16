@@ -1715,7 +1715,7 @@ task_make_ics:
           orog_files_target_grid: "{{ 'CRES' | env }}{{ workflow.DOT_OR_USCORE }}oro_data.tile{{ constants.TILE_RGNL }}.halo{{ constants.NH4 }}.nc"
           vcoord_file_target_grid: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
-          data_dir_input_grid: "{{ task_make_ics.chgres_cube.rundir }}"
+          data_dir_input_grid: '{{workflow.EXPTDIR }}/{{ timevars.yyyymmddhh }}/{{ task_get_extrn_ics.EXTRN_MDL_NAME_ICS }}/for_ICS{{ "/mem%s" % ("MEMBER"|env) if global.DO_ENSEMBLE  }}'
           cycle_mon: !int "{{ cycle.strftime('%m') }}"
           cycle_day: !int "{{ cycle.strftime('%d') }}"
           cycle_hour: !int "{{ cycle.strftime('%H') }}"
@@ -1780,7 +1780,7 @@ task_make_lbcs:
           orog_files_target_grid: "{{ 'CRES' | env }}{{ workflow.DOT_OR_USCORE }}oro_data.tile{{ constants.TILE_RGNL }}.halo{{ constants.NH4 }}.nc"
           vcoord_file_target_grid: "{{ workflow.FIXam }}/global_hyblev.l65.txt"
           varmap_file: "{{ user.PARMdir }}/ufs_utils/varmap_tables/GFSphys_var_map.txt"
-          data_dir_input_grid: "{{ task_make_lbcs.chgres_cube.rundir }}"
+          data_dir_input_grid: '{{workflow.EXPTDIR }}/{{ timevars.yyyymmddhh }}/{{ task_get_extrn_lbcs.EXTRN_MDL_NAME_LBCS }}/for_LBCS{{ "/mem%s" % ("MEMBER"|env) if global.DO_ENSEMBLE  }}'
           cycle_mon: !int "{{ cycle.strftime('%m') }}"
           cycle_day: !int "{{ cycle.strftime('%d') }}"
           cycle_hour: !int "{{ cycle.strftime('%H') }}"
