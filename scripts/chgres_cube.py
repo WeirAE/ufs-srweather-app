@@ -165,28 +165,26 @@ def run_chgres_cube(config_file, cycle, key_path, member):
 
         # Deliver output data to a common location above the rundir.
         links = {}
-
         nco_net = expt_config["nco"]["NET_default"]
-        dot_ensmem = f".mem{member}"
         tile_rgnl = expt_config["constants"]["TILE_RGNL"]
         nh0 = expt_config["constants"]["NH0"]
         cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[-2:]
 
-        output_dir = os.path.join(os.path.dirname(rundir.parent), "INPUT")
-        links[f"out.atm.tile{tile_rgnl}.nc"] = str(
-            f"{output_dir}{nco_net}.t{cyc}z{dot_ensmem}.gfs_data.tile{tile_rgnl}.halo{nh0}.nc"
+        output_dir = os.path.join(rundir.parent, "INPUT")
+        os.makedirs(output_dir, exist_ok=True)
+        links[
+            f"{nco_net}.t{cyc}z.gfs_data.tile{tile_rgnl}.halo{nh0}.nc"
+        ] = str(rundir / f"out.atm.tile{tile_rgnl}.nc")
+        links[
+            f"{nco_net}.t{cyc}z.sfc_data.tile{tile_rgnl}.halo{nh0}.nc"
+        ] = str(rundir / f"out.sfc.tile{tile_rgnl}.nc")
+        links[f"{nco_net}.t{cyc}z.gfs_ctrl.nc"] = str(
+            rundir / f"gfs_ctrl.nc"
         )
-        links[f"out.sfc.tile{tile_rgnl}.nc"] = str(
-            f"{output_dir}{nco_net}.t{cyc}z{dot_ensmem}.sfc_data.tile{tile_rgnl}.halo{nh0}.nc"
+        links[f"{nco_net}.t{cyc}z.gfs_bndy.tile{tile_rgnl}.f000.nc"] = str(
+            rundir / f"gfs.bndy.nc"
         )
-        links[f"gfs_ctrl.nc"] = str(
-            f"{output_dir}{nco_net}.t{cyc}z{dot_ensmem}.gfs_ctrl.nc"
-        )
-        links[f"gfs.bndy.nc"] = str(
-            f"{output_dir}{nco_net}.t{cyc}z{dot_ensmem}.gfs_bndy.tile{tile_rgnl}.f000.nc"
-        )
-
-        uwlink(target_dir=rundir, config=links)
+        uwlink(target_dir=output_dir, config=links)
 
     # Loop the run of chgres_cube for the forecast length if lbcs
     else:
@@ -245,16 +243,16 @@ def run_chgres_cube(config_file, cycle, key_path, member):
                 cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[-2:]
 
                 nco_net = expt_config["nco"]["NET_default"]
-                dot_ensmem = f".mem{member}"
 
-                lbc_input_fn = "gfs.bndy.nc"
-                output_dir = os.path.join(os.path.dirname(rundir.parent), "INPUT")
+                lbc_input_fn = rundir / f"gfs.bndy.nc"
+                output_dir = os.path.join(rundir.parent, "INPUT")
+                os.makedirs(output_dir, exist_ok=True)
                 lbc_output_fn = str(
-                    f"{output_dir}{nco_net}.t{cyc}z{dot_ensmem}"
+                    f"{nco_net}.t{cyc}z"
                     f".gfs_bndy.tile7.f{fcst_hhh_FV3LAM}.nc"
                 )
-                links[lbc_input_fn] = str(lbc_output_fn)
-                uwlink(target_dir=rundir, config=links)
+                links[lbc_output_fn] = str(lbc_input_fn)
+                uwlink(target_dir=output_dir, config=links)
 
     # error message
     if not (rundir / "runscript.chgres_cube.done").is_file():
