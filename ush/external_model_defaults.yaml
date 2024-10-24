@@ -1,23 +1,20 @@
-grib2_default_config: &grib2_default_config
-  input_type: "grib2"
-  convert_nst: False
 
 
 FV3GFS:
   task_make_ics:
     chgres_cube:
-        namelist:
-          update_values:
-            config:
-              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
+      namelist:
+        update_values:
+          config:
+            tracers_input: ["spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"]
+            tracers: ["sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"]
   task_make_lbcs:
     chgres_cube:
-        namelist:
-          update_values:
-            config:
-              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
+      namelist:
+        update_values:
+          config:
+            tracers_input: ["spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"]
+            tracers: ["sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"]
 
 GSMGFS:
   task_make_ics:
@@ -28,8 +25,8 @@ GSMGFS:
               input_type: "gfs_gaussian_nemsio"
               external_model: "GSMGFS"
               convert_nst: False
-              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\"]
-              tracers: [\"sphum\",\"liq_wat\",\"o3mr\"]
+              tracers_input: ["spfh","clwmr","o3mr"]
+              tracers: ["sphum","liq_wat","o3mr"]
   task_make_lbcs:
     chgres_cube:
         namelist:
@@ -38,8 +35,8 @@ GSMGFS:
               input_type: "gfs_gaussian_nemsio"
               external_model: "GSMGFS"
               convert_nst: False
-              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\"]
-              tracers: [\"sphum\",\"liq_wat\",\"o3mr\"]
+              tracers_input: ["spfh","clwmr","o3mr"]
+              tracers: ["sphum","liq_wat","o3mr"]
 
 UFS-CASE-STUDY:
   task_make_ics:
@@ -48,105 +45,106 @@ UFS-CASE-STUDY:
         update_values:
           config:
             external_model: "UFS-CASE-STUDY"
-            tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-            tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
+            tracers_input: ["spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"]
+            tracers: ["sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"]
   task_make_lbcs:
     chgres_cube:
-        namelist:
-          update_values:
-            config:
-              external_model: "UFS-CASE-STUDY"
-              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
+      namelist:
+        update_values:
+          config:
+            external_model: "UFS-CASE-STUDY"
+            tracers_input: ["spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"]
+            tracers: ["sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"]
 
 GDAS:
   task_make_ics:
     chgres_cube:
-        namelist:
-          update_values:
-            config:
-              external_model: "GFS"
-              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
-              tg3_from_soil: True
+      namelist:
+        update_values:
+          config:
+            external_model: "GFS"
+            tracers_input: ["spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"]
+            tracers: ["sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"]
+            tg3_from_soil: True
   task_make_lbcs:
     chgres_cube:
-        namelist:
-          update_values:
-            config:
-              external_model: "GFS"
-              tracers_input: [\"spfh\",\"clwmr\",\"o3mr\",\"icmr\",\"rwmr\",\"snmr\",\"grle\"]
-              tracers: [\"sphum\",\"liq_wat\",\"o3mr\",\"ice_wat\",\"rainwat\",\"snowwat\",\"graupel\"]
-              tg3_from_soil: True
+      namelist:
+        update_values:
+          config:
+            external_model: "GFS"
+            tracers_input: ["spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"]
+            tracers: ["sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"]
 
 GEFS:
   task_make_ics:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "GFS"
+        update_values:
+          config:
+            input_type: "grib2"
+            convert_nst: False
+            external_model: "GFS"
   task_make_lbcs:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "GFS"
+        update_values:
+          config:
+            input_type: "grib2"
+            external_model: "GFS"
 
 HRRR:
   task_make_ics:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "HRRR"
-              geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_HRRRX"
-              tg3_from_soil: True
+        update_values:
+          config:
+            input_type: "grib2"
+            convert_nst: False
+            external_model: "HRRR"
+            geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_HRRRX"
+            tg3_from_soil: True
+            nsoill_out: 9
   task_make_lbcs:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "HRRR"
-              geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_HRRRX"
-              tg3_from_soil: True
+        update_values:
+          config:
+            input_type: "grib2"
+            external_model: "HRRR"
 
 RAP:
   task_make_ics:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "RAP"
-              geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_RAPX"
-              tg3_from_soil: True
+        update_values:
+          config:
+            input_type: "grib2"
+            convert_nst: False
+            external_model: "RAP"
+            geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_RAPX"
+            tg3_from_soil: True
+            nsoill_out: 9
   task_make_lbcs:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "RAP"
-              geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_RAPX"
-              tg3_from_soil: True
+        update_values:
+          config:
+            input_type: "grib2"
+            external_model: "RAP"
 
 NAM:
   task_make_ics:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "NAM"
+        update_values:
+          config:
+            input_type: "grib2"
+            convert_nst: False
+            external_model: "NAM"
   task_make_lbcs:
     chgres_cube:
       namelist:
-          update_values:
-            config:
-              <<: *grib2_default_config
-              external_model: "NAM"
+        update_values:
+          config:
+            input_type: "grib2"
+            external_model: "NAM"

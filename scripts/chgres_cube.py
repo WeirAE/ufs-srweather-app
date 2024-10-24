@@ -94,7 +94,7 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def run_chgres_cube(config_file, cycle, key_path, member):
     """
     Setup and run the chgres_cube Driver.
@@ -103,9 +103,18 @@ def run_chgres_cube(config_file, cycle, key_path, member):
     # The experiment config will have {{ MEMBER | env }} expressions in it that need to be
     # dereferenced during driver initialization.
 
-    os.environ["member"] = member
-
+    os.environ["MEMBER"] = member
     expt_config = get_yaml_config(config_file)
+
+    dot_ensmem = (
+        f".mem{member}"
+        if (
+            expt_config["user"]["RUN_ENVIR"] == "nco"
+            and expt_config["global"]["DO_ENSEMBLE"]
+            and member
+        )
+        else ""
+    )
 
     # dereference expressions during driver initialization
     CRES = expt_config["workflow"]["CRES"]
@@ -168,20 +177,18 @@ def run_chgres_cube(config_file, cycle, key_path, member):
         nco_net = expt_config["nco"]["NET_default"]
         tile_rgnl = expt_config["constants"]["TILE_RGNL"]
         nh0 = expt_config["constants"]["NH0"]
-        cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[-2:]
+        cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[8:10]
 
         output_dir = os.path.join(rundir.parent, "INPUT")
         os.makedirs(output_dir, exist_ok=True)
         links[
-            f"{nco_net}.t{cyc}z.gfs_data.tile{tile_rgnl}.halo{nh0}.nc"
+            f"{nco_net}.t{cyc}z{dot_ensmem}.gfs_data.tile{tile_rgnl}.halo{nh0}.nc"
         ] = str(rundir / f"out.atm.tile{tile_rgnl}.nc")
         links[
-            f"{nco_net}.t{cyc}z.sfc_data.tile{tile_rgnl}.halo{nh0}.nc"
+            f"{nco_net}.t{cyc}z{dot_ensmem}.sfc_data.tile{tile_rgnl}.halo{nh0}.nc"
         ] = str(rundir / f"out.sfc.tile{tile_rgnl}.nc")
-        links[f"{nco_net}.t{cyc}z.gfs_ctrl.nc"] = str(
-            rundir / f"gfs_ctrl.nc"
-        )
-        links[f"{nco_net}.t{cyc}z.gfs_bndy.tile{tile_rgnl}.f000.nc"] = str(
+        links[f"{nco_net}.t{cyc}z.gfs_ctrl.nc"] = str(rundir / f"gfs_ctrl.nc")
+        links[f"{nco_net}.t{cyc}z{dot_ensmem}.gfs_bndy.tile{tile_rgnl}.f000.nc"] = str(
             rundir / f"gfs.bndy.nc"
         )
         uwlink(target_dir=output_dir, config=links)
@@ -240,7 +247,7 @@ def run_chgres_cube(config_file, cycle, key_path, member):
                 ]
                 fcst_hhh = int(lbc_spec_fhrs) - int(lbc_offset_fhrs)
                 fcst_hhh_FV3LAM = f"{fcst_hhh:03d}"
-                cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[-2:]
+                cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[8:10]
 
                 nco_net = expt_config["nco"]["NET_default"]
 
@@ -248,7 +255,7 @@ def run_chgres_cube(config_file, cycle, key_path, member):
                 output_dir = os.path.join(rundir.parent, "INPUT")
                 os.makedirs(output_dir, exist_ok=True)
                 lbc_output_fn = str(
-                    f"{nco_net}.t{cyc}z"
+                    f"{nco_net}.t{cyc}z{dot_ensmem}"
                     f".gfs_bndy.tile7.f{fcst_hhh_FV3LAM}.nc"
                 )
                 links[lbc_output_fn] = str(lbc_input_fn)

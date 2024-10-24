@@ -1,0 +1,105 @@
+Checking that all tests are valid
+Will run 1 tests:
+/scratch2/NAGAPE/epic/Brian.Weir/ufs-srweather-app/tests/WE2E/test_configs/grids_extrn_mdls_suites_community/config.grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16.yaml
+Calling workflow generation function for test grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16
+
+
+  ========================================================================
+  Starting experiment generation...
+  ========================================================================
+
+  ========================================================================
+  Starting function setup() in "setup.py"...
+  ========================================================================
+  WORKFLOW ID = 
+
+  Specified directory or file already exists:
+      /scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16
+  Moving (renaming) preexisting directory or file to:
+      /scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16_old_20241024_030803
+
+Removing verification [meta]task
+  "task_get_obs_nohrsc"
+from workflow since no fields belonging to observation type "NOHRSC"
+are specified for verification.
+
+Removing verification [meta]task
+  "metatask_PcpCombine_fcst_ASNOW_all_accums_all_mems"
+from workflow since no fields belonging to observation type "NOHRSC"
+are specified for verification.
+
+Removing verification [meta]task
+  "metatask_GridStat_NOHRSC_all_accums_all_mems"
+from workflow since no fields belonging to observation type "NOHRSC"
+are specified for verification.
+
+Removing verification [meta]task
+  "metatask_GenEnsProd_EnsembleStat_NOHRSC"
+from workflow since no fields belonging to observation type "NOHRSC"
+are specified for verification.
+
+Removing verification [meta]task
+  "metatask_GridStat_NOHRSC_ensmeanprob_all_accums"
+from workflow since no fields belonging to observation type "NOHRSC"
+are specified for verification.
+
+  Generating the global experiment variable definitions file here:
+    GLOBAL_VAR_DEFNS_FP = '/scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16/var_defns.yaml'
+  For more detailed information, set DEBUG to 'TRUE' in the experiment
+  configuration file ('config.yaml').
+
+  Creating rocoto workflow XML file (WFLOW_XML_FP):
+    WFLOW_XML_FP = '/scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16/FV3LAM_wflow.xml'
+
+  To launch the workflow, change location to the experiment directory
+  (EXPTDIR) and issue the rocotrun command, as follows:
+
+    > cd /scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16
+    > rocotorun -w FV3LAM_wflow.xml -d FV3LAM_wflow.db -v 10
+
+  To check on the status of the workflow, issue the rocotostat command
+  (also from the experiment directory):
+
+    > rocotostat -w FV3LAM_wflow.xml -d FV3LAM_wflow.db -v 10
+
+  Note that:
+
+  1) The rocotorun command must be issued after the completion of each
+     task in the workflow in order for the workflow to submit the next
+     task(s) to the queue.
+
+  2) In order for the output of the rocotostat command to be up-to-date,
+     the rocotorun command must be issued immediately before issuing the
+     rocotostat command.
+
+  For automatic resubmission of the workflow (say every 3 minutes), the
+  following line can be added to the user's crontab (use 'crontab -e' to
+  edit the cron table):
+
+  */3 * * * * cd /scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16 && ./launch_FV3LAM_wflow.sh called_from_cron="TRUE"
+
+Workflow for test grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16 successfully generated in
+/scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16
+
+All experiments have been generated;
+Experiment file WE2E_tests_20241024030751.yaml created
+Writing information for all experiments to WE2E_tests_20241024030751.yaml
+Checking tests available for monitoring...
+Starting experiment grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16_20241024030751 running
+Setup complete; monitoring 1 experiments
+Use ctrl-c to pause job submission/monitoring
+10/24/24 03:20:46 UTC :: FV3LAM_wflow.xml :: Cycle 202105121200, Task run_fcst_mem002, jobid=1459914, in state DEAD (FAILED), ran for 55.0 seconds, exit status=1, try=1 (of 1)
+10/24/24 03:20:47 UTC :: FV3LAM_wflow.xml :: Cycle 202105121200, Task run_fcst_mem001, jobid=1459913, in state DEAD (FAILED), ran for 59.0 seconds, exit status=1, try=1 (of 1)
+Experiment grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16_20241024030751 is DEAD
+Took 0:12:56.956921; will no longer monitor.
+All 1 experiments finished
+Calculating core-hour usage and printing final summary
+----------------------------------------------------------------------------------------------------
+Experiment name                                                  | Status    | Core hours used 
+----------------------------------------------------------------------------------------------------
+grid_RRFS_CONUS_25km_ics_NAM_lbcs_NAM_suite_GFS_v16_2024102403075  DEAD                   3.84
+----------------------------------------------------------------------------------------------------
+Total                                                              DEAD                   3.84
+
+Detailed summary written to /scratch2/NAGAPE/epic/Brian.Weir/expt_dirs/WE2E_summary_20241024032053.txt
+
