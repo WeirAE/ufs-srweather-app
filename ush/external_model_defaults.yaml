@@ -1,5 +1,3 @@
-
-
 FV3GFS:
   task_make_ics:
     chgres_cube:
@@ -103,7 +101,6 @@ HRRR:
             external_model: "HRRR"
             geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_HRRRX"
             tg3_from_soil: True
-            nsoill_out: 9
   task_make_lbcs:
     chgres_cube:
       namelist:
@@ -123,7 +120,6 @@ RAP:
             external_model: "RAP"
             geogrid_file_input_grid: "{{ platform.FIXgsm }}/geo_em.d01.nc_RAPX"
             tg3_from_soil: True
-            nsoill_out: 9
   task_make_lbcs:
     chgres_cube:
       namelist:

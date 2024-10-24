@@ -100,12 +100,14 @@ def run_chgres_cube(config_file, cycle, key_path, member):
     Setup and run the chgres_cube Driver.
     """
 
-    # The experiment config will have {{ MEMBER | env }} expressions in it that need to be
-    # dereferenced during driver initialization.
-
-    os.environ["MEMBER"] = member
+    # dereference expressions during driver initialization
     expt_config = get_yaml_config(config_file)
+    CRES = expt_config["workflow"]["CRES"]
+    os.environ["CRES"] = CRES
+    os.environ["MEMBER"] = member
 
+    # set universal variables
+    cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[8:10]
     dot_ensmem = (
         f".mem{member}"
         if (
@@ -115,10 +117,7 @@ def run_chgres_cube(config_file, cycle, key_path, member):
         )
         else ""
     )
-
-    # dereference expressions during driver initialization
-    CRES = expt_config["workflow"]["CRES"]
-    os.environ["CRES"] = CRES
+    nco_net = expt_config["nco"]["NET_default"]
 
     # Extract driver config from experiment config
     chgres_cube_driver = ChgresCube(
@@ -126,6 +125,8 @@ def run_chgres_cube(config_file, cycle, key_path, member):
         cycle=cycle,
         key_path=key_path,
     )
+    rundir = Path(chgres_cube_driver.config["rundir"])
+    print(f"Will run in {rundir}")
 
     # Dereference cycle for file paths
     expt_config_cp = get_yaml_config(deepcopy(expt_config.data))
@@ -135,20 +136,18 @@ def run_chgres_cube(config_file, cycle, key_path, member):
             **expt_config_cp,
         }
     )
-
     chgres_cube_config = _walk_key_path(expt_config_cp, key_path)
-    # update fn_atm and fn_sfc for ics task
+    input_type = chgres_cube_config["chgres_cube"]["namelist"]["update_values"][
+        "config"
+    ].get("input_type")
+
+    # update config for ics task, run and stage data
     if "task_make_ics" in key_path:
-        rundir = Path(chgres_cube_driver.config["rundir"])
-        print(f"Will run in {rundir}")
         varsfilepath = chgres_cube_config["input_files_metadata_path"]
         shconfig = _parse_var_defns(varsfilepath)
         extrn_config_fns = shconfig["EXTRN_MDL_FNS"]
         extrn_config_fhrs = shconfig["EXTRN_MDL_FHRS"]
 
-        input_type = chgres_cube_config["chgres_cube"]["namelist"]["update_values"][
-            "config"
-        ].get("input_type")
         if input_type == "grib2":
             fn_grib2 = extrn_config_fns[0]
             update = {"grib2_file_input_grid": fn_grib2}
@@ -156,6 +155,18 @@ def run_chgres_cube(config_file, cycle, key_path, member):
             fn_atm = extrn_config_fns[0]
             fn_sfc = extrn_config_fns[1]
             update = {"atm_files_input_grid": fn_atm, "sfc_files_input_grid": fn_sfc}
+        if expt_config["task_get_extrn_ics"]["EXTRN_MDL_NAME_ICS"] in [
+            "HRRR",
+            "RAP",
+        ]:
+            if expt_config["workflow"]["SDF_USES_RUC_LSM"] is True:
+                update["nsoill_out"] = 9
+        else:
+            if expt_config["workflow"]["SDF_USES_THOMPSON_MP"] is True:
+                update["thomp_mp_climo_file"] = expt_config["workflow"][
+                    "THOMPSON_MP_CLIMO_FP"
+
+                ]
 
         update_cfg = {
             "task_make_ics": {
@@ -174,10 +185,8 @@ def run_chgres_cube(config_file, cycle, key_path, member):
 
         # Deliver output data to a common location above the rundir.
         links = {}
-        nco_net = expt_config["nco"]["NET_default"]
         tile_rgnl = expt_config["constants"]["TILE_RGNL"]
         nh0 = expt_config["constants"]["NH0"]
-        cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[8:10]
 
         output_dir = os.path.join(rundir.parent, "INPUT")
         os.makedirs(output_dir, exist_ok=True)
@@ -193,10 +202,8 @@ def run_chgres_cube(config_file, cycle, key_path, member):
         )
         uwlink(target_dir=output_dir, config=links)
 
-    # Loop the run of chgres_cube for the forecast length if lbcs
+    #  update config for lbcs task, loop run and stage data
     else:
-        rundir = Path(chgres_cube_driver.config["rundir"])
-        print(f"Will run in {rundir}")
         fn_sfc = ""
         varsfilepath = chgres_cube_config["input_files_metadata_path"]
         shconfig = _parse_var_defns(varsfilepath)
@@ -204,12 +211,8 @@ def run_chgres_cube(config_file, cycle, key_path, member):
         extrn_config_fhrs = shconfig["EXTRN_MDL_FHRS"]
         num_fhrs = len(extrn_config_fhrs)
 
-        input_type = chgres_cube_config["chgres_cube"]["namelist"]["update_values"][
-            "config"
-        ].get("input_type")
         bcgrp10 = 0
         bcgrpnum10 = 1
-        update = {}
         for ii in range(bcgrp10, num_fhrs, bcgrpnum10):
             i = ii + bcgrp10
             if i < num_fhrs:
@@ -220,6 +223,14 @@ def run_chgres_cube(config_file, cycle, key_path, member):
                 else:
                     fn_atm = extrn_config_fns[i]
                     update = {"atm_files_input_grid": fn_atm}
+                if expt_config["task_get_extrn_lbcs"]["EXTRN_MDL_NAME_LBCS"] not in [
+                    "HRRR",
+                    "RAP",
+                ]:
+                    if expt_config["workflow"]["SDF_USES_THOMPSON_MP"] is True:
+                        update["thomp_mp_climo_file"] = expt_config["workflow"][
+                            "THOMPSON_MP_CLIMO_FP"
+                        ]
 
                 update_cfg = {
                     "task_make_lbcs": {
@@ -247,9 +258,6 @@ def run_chgres_cube(config_file, cycle, key_path, member):
                 ]
                 fcst_hhh = int(lbc_spec_fhrs) - int(lbc_offset_fhrs)
                 fcst_hhh_FV3LAM = f"{fcst_hhh:03d}"
-                cyc = str(expt_config["workflow"]["DATE_FIRST_CYCL"])[8:10]
-
-                nco_net = expt_config["nco"]["NET_default"]
 
                 lbc_input_fn = rundir / f"gfs.bndy.nc"
                 output_dir = os.path.join(rundir.parent, "INPUT")
